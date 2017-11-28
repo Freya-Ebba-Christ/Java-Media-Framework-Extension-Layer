@@ -1,0 +1,26 @@
+   mat cov(const mat &X, bool is_zero_mean)
+00233   {
+00234     int d = X.cols(), n = X.rows(), i, j, k;
+00235     mat R(d, d), m2(n, d);
+00236     vec tmp;
+00237 
+00238     if (!is_zero_mean) {
+00239       // Compute and remove mean
+00240       for (i=0; i<d; i++) {
+00241         tmp = X.get_col(i);
+00242         m2.set_col(i, tmp - mean(tmp));
+00243       }
+00244     }
+00245 
+00246     // Calc corr matrix
+00247     R = 0.0;
+00248     for (i=0; i<d; i++)
+00249       for (j=0; j<=i; j++) {
+00250         for (k=0; k<n; k++)
+00251           R(i,j) += m2(k,i) * m2(k,j);
+00252         R(j,i) = R(i,j); // When i=j this is unnecassary work 
+00253       }
+00254     R /= n;
+00255 
+00256     return R;
+00257   }

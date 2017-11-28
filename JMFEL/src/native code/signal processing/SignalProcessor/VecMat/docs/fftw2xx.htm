@@ -1,0 +1,89 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"
+  "http://www.w3.org/TR/REC-html40/transitional.dtd">
+<HTML>
+<HEAD>
+  <TITLE>VecMat - FFTW</TITLE>
+  <META HTTP-EQUIV="Content-Type" CONTENT="text/html;charset=iso-8859-1">
+  <META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+  <META NAME="Author" CONTENT="Kevin Dolan">
+  <LINK HREF="vecmat.css" REL="stylesheet" TYPE="text/css">
+</HEAD>
+
+<BODY>
+
+<H1>Using this Software with the <EM>FFTW-2.xx</EM> Libraries.</H1>
+
+<P>The contents of the header file "vm_fftw2.h" provide two wrapper classes for
+using the <EM>FFTW</EM> one-dimensional Fourier transforms with the
+<CODE>Vector&lt;T&gt;</CODE> classes. These classes serve only as wrappers, and
+should incur no performance penalty over directly using the functions. They
+are:</P>
+
+<P><A HREF="fftwplan.htm">FFTWPlan</A></P>
+<P><A HREF="fftwplan.htm#rfftw">RFFTWPlan</A></P>
+
+<P>The <CODE>FFTWPlan</CODE> class can also take care of conversion from the
+<CODE>std::complex&lt;T&gt;</CODE> classes to the <CODE>fftw_complex</CODE>
+structure. This is done by explicitly casting the pointers to the vector data
+to type <CODE>fftw_complex *</CODE>. As long as the same storage scheme is used
+for both the <CODE>fftw_complex</CODE> structure, and the
+<CODE>std::complex&lt;fftw_real&gt;</CODE> class, this should work. This means
+that your implementation of the <CODE>std::complex</CODE> template classes must
+contain only two data members, and the real part must be listed first, followed
+by the imaginary part. If this storage scheme is not used, this will not
+work.</P>
+
+<P>The advantage of using these conversions is to both allow you to make use of
+the extensive built in functionality of the complex template classes, and to
+allow full usage of vectors composed of these types. You can also call the
+<CODE>FFTWPlan</CODE> routines with vectors of <CODE>fftw_complex</CODE>
+values, if the above conversions do not work on your implementation.</P>
+
+<P>The documentation lists the <CODE>fourier()</CODE> and
+<CODE>ifourier()</CODE> member functions as taking arguments of types
+<CODE>Vec_REAL</CODE> for the real transforms, and <CODE>Vec_CPLX_REAL</CODE>
+or <CODE>Vec_FFTW_CPLX</CODE> for the complex transforms. These types depend on
+whether you have compiled the <EM>FFTW</EM> for single or double precision.
+The <EM>VecMat</EM> software will automatically expect the same precision that
+<EM>FFTW</EM> was compiled for. That means that if the libraries were compiled
+for single precision, then the types <CODE>Vec_REAL</CODE> and
+<CODE>Vec_CPLX_REAL</CODE> will be synonyms for <CODE>Vec_SP</CODE> and
+<CODE>Vec_CPLX_SP</CODE>, respectively. If it is complied for double precision,
+then they will be synonyms for <CODE>Vec_DP</CODE> and
+<CODE>Vec_CPLX_DP</CODE>. <CODE>Vec_FFTW_CPLX</CODE> is a synonym for
+<CODE>Vector&lt;fftw_complex&gt;</CODE>. These typedefs are only included if
+the header file "vm_fftw2.h" is included.</P>
+
+<DIV CLASS=clb>
+<P>typedef fftw_real REAL</P>
+<P>typedef fftw_complex FFTW_CPLX</P>
+<P>typedef std::complex&lt;REAL&gt; CPLX_REAL</P>
+<P>typedef Vector&lt;REAL&gt; Vec_REAL</P>
+<P>typedef Vector&lt;FFTW_CPLX&gt; Vec_FFTW_CPLX</P>
+<P>typedef Vector&lt;CPLX_REAL&gt; Vec_CPLX_REAL</P>
+</DIV>
+
+<P></P>
+
+<P>Also included in this header file is a global function for estimating a good
+length for performing FFT's.</P>
+
+<H4><CODE>size_t good_size(size_t len, size_t factor = 1)</CODE></H4>
+<P>This function finds a number with only small prime factors. It returns a
+value not more than 12.5% larger than <CODE>len</CODE>, with mostly prime
+factors of 2, and at most three prime factors of 3 and 5. The optional
+parameter <CODE>factor</CODE> can be used to make sure the returned value is
+divisible by a certain number. If <CODE>len</CODE> is less than <CODE>128 *
+factor</CODE>, then the function will simply return the smallest number greater
+than or equal to <CODE>len</CODE> which is divisible by
+<CODE>factor</CODE>.</P>
+
+<P>Note that these wrappers only provide access to a small subset of the
+functionality of the <EM>FFTW</EM> software. For specific information on how
+the <EM>FFTW</EM> software works, see the online documentation on their
+website: <A HREF="http://www.fftw.org/">http://www.fftw.org</A>.</P>
+
+<P><A HREF="fftw3xx.htm">Back to FFTW</A></P>
+
+</BODY>
+</HTML>

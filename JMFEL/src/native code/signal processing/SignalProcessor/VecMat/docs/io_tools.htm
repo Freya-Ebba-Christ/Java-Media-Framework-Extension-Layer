@@ -1,0 +1,279 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"
+  "http://www.w3.org/TR/REC-html40/transitional.dtd">
+<HTML>
+<HEAD>
+  <TITLE>VecMat - Global Functions and Operators for File and Stream IO</TITLE>
+  <META HTTP-EQUIV="Content-Type" CONTENT="text/html;charset=iso-8859-1">
+  <META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+  <META NAME="Author" CONTENT="Kevin Dolan">
+  <LINK HREF="vecmat.css" REL="stylesheet" TYPE="text/css">
+</HEAD>
+
+<BODY>
+
+<H1>8. Global Functions and Operators for File and Stream IO</H1>
+
+<H4><CODE>template &lt;class T&gt; offset_type file_status(const string&amp;
+fname, offset_type skip = 0)</CODE></H4>
+<P>This function acts as a simple wrapper for the <CODE>stat()</CODE> function
+provided in the &lt;sys/stat.h&gt; header file (On <EM>MinGW32</EM> platforms
+it wraps the <CODE>_stati64()</CODE> function). It returns the file size in
+units of <CODE>sozeof(T)</CODE>. The optional parameter <CODE>skip</CODE> can
+be used to tell the function to skip that many bytes when calculating the file
+size. This is useful for files with a header of known size. If the file cannot
+be opened, or contains no data, then the return value is -1. If the size of the
+file, after subtracting <CODE>skip</CODE> bytes, is not divisible by
+<CODE>sizeof(T)</CODE> then the function returns -2. This function does not
+take any arguments of type <CODE>T</CODE>, so when you call it you must
+stipulate the template parameter. For example:</P>
+
+<DIV CLASS=sc>
+<P>offset_type len = file_status&lt;double&gt;("data.bin", 64);</P>
+</DIV>
+
+<P>The above code would return the number of doubles which could be read from
+the file "data.bin", after skipping the first 64 bytes. If the file size in
+bytes is less than 72, the function will return -1. If the file size minus 64
+is not divisible by 8, the function will return -2.</P>
+
+<P>This is primarily intended for binary files. For text files the template
+type should be <CODE>char</CODE>, regardless of the type of data it contains.
+The <CODE>skip</CODE> parameter also probably will make no sense for text
+files, since their headers typically are not some fixed number of bytes. The
+function can still be used to determine if the file contains data, and in some
+cases the file size may be useful for approximating the number of values that
+can be read from it. This function is provided in "vm_basic.h".</P>
+
+<H2>8.1 Streaming IO Operators.</H2>
+
+<P>These operators provide insertion and extraction operators for using vectors
+and matrices with iostreams. You should include "vec_mat.h" instead of
+"vm_basic.h" if you want to use them.</P>
+
+<H3>8.1.1. Streaming IO Operators for Vectors.</H3>
+
+<H4><CODE>ostream&amp; operator&lt;&lt;(ostream&amp; out, const
+Vector&lt;T&gt;&amp; x)</CODE></H4>
+<P>This functions identically to the <CODE>write(ostream&amp;)</CODE> member
+function, except that it returns a reference to the stream for cascading.</P>
+
+<H4><CODE>istream&amp; operator&gt;&gt;(istream&amp; in, Vector&lt;T&gt;&amp;
+x)</CODE></H4>
+<P>This functions identically to the <CODE>read(istream&amp;)</CODE> member
+function, except that it returns a reference to the stream for cascading.</P>
+
+<H3>8.1.2. Streaming IO Operators for Matrices.</H3>
+
+<H4><CODE>ostream&amp; operator&lt;&lt;(ostream&amp; out, const
+Matrix&lt;T&gt;&amp; x)</CODE></H4>
+<P>This functions identically to the <CODE>write(ostream&amp;)</CODE> member
+function, except that it returns a reference to the stream for cascading.</P>
+
+<H4><CODE>istream&amp; operator&gt;&gt;(istream&amp; in, Matrix&lt;T&gt;&amp;
+x)</CODE></H4>
+<P>This functions identically to the <CODE>write(ostream&amp;)</CODE> member
+function, except that it returns a reference to the stream for cascading.</P>
+
+<H2>8.2. File IO Functions.</H2>
+
+<P>These functions allow some additional file io features not provided by the
+<CODE>read()</CODE> and <CODE>write()</CODE> member functions.</P>
+
+<H4><CODE>template &lt;class T&gt; ptrdiff_t read_binary(const string&amp;
+fname, Vector&lt;T&gt;&amp; array, size_t skip = 0)</CODE></H4>
+<P>This reads a binary file into a vector. Unlike the <CODE>read()</CODE>
+member function, this function reshapes the vector to the appropriate size. The
+file should not be open when the function is called. The optional parameter
+<CODE>skip</CODE>, indicates the number of bytes that should be skipped before
+reading begins. This function returns the number of values read, if successful.
+If the file could not be opened, or contains no data, a value of -1 is returned.
+If the length of the file (in bytes) minus <CODE>skip</CODE> is not an integer
+multiple of <CODE>sizeof(T)</CODE>, a value of -2 is returned. A value of -3 is
+returned if an error occurs during the reading of the file. In the first two
+cases <CODE>array</CODE> will be unchanged. In the third case
+<CODE>array</CODE> will be empty after the function call.</P>
+
+<H4><CODE>template &lt;class T&gt; void write_binary(const string&amp; fname,
+const Vector&lt;T&gt;&amp; array)</CODE></H4>
+<P>This outputs a vector to a binary file. The file should not be open when the
+function is called. This is equivalent to calling
+<CODE>write(fname, BIN)</CODE>.</P>
+
+<H4><CODE>template &lt;class T&gt; ptrdiff_t read_text(const string&amp;
+fname, Vector&lt;T&gt;&amp; array, size_t skip = 0)</CODE></H4>
+<P>This reads a text file into a vector. Unlike the <CODE>read()</CODE>
+member function, this function reshapes the vector to the appropriate size. The
+file should not be open when the function is called. The optional parameter
+<CODE>skip</CODE>, indicates the number of lines of text that should be
+skipped before reading begins. This function returns the number of values read,
+if successful. If unsuccessful the return value will be -1, and
+<CODE>array</CODE> will be unchanged.</P>
+
+<H4><CODE>template &lt;class T&gt; void write_text(const string&amp; fname,
+const Vector&lt;T&gt;&amp; array)</CODE></H4>
+<P>This outputs a vector to a text file. The file should not be open when the
+function is called. This is equivalent to calling
+<CODE>write(fname, TXT)</CODE>.</P>
+
+<H2>8.3. The File Class.</H2>
+<P>The <CODE>fstream</CODE> classes, which the above functions, as well as the
+<CODE>Vector&lt;T&gt;::read()</CODE>, <CODE>Vector&lt;T&gt;::write()</CODE>,
+<CODE>Matrix&lt;T&gt;::read()</CODE>, and <CODE>Matrix&lt;T&gt;::write()</CODE>
+functions all use, will not work for files which require 64bit file pointers on
+32bit platforms. This is an inherent limitation of the <CODE>fstream</CODE>
+classes. To address this, a wrapper class for the <EM>stdio</EM> file IO
+functions is provided. Note that while the syntax for this class is similar to
+<CODE>fstream</CODE>, this class is <STRONG>not</STRONG> an iostream.</P>
+
+<P>This class is strictly for binary mode file IO, and includes functions only
+for reading and writing to and from vectors. In order to use this class with
+large files on 32bit platforms, you must still enable large file support for
+your compilor. For <EM>MinGw</EM> and <EM>Cygwin</EM> this should be enabled
+automatically. For other platforms, you made need to set a flag to enable
+transparent large file support. For example, using <EM>gcc</EM> under
+<EM>Linux</EM> you would need to use <CODE>-D_FILE_OFFSET_BITS=64</CODE>,
+and <CODE>-D_LARGEFILE_SOURCE</CODE>.</P>
+
+<H3>8.3.1. Constructors and Destructor.</H3>
+
+<H4><CODE>File()</CODE></H4>
+<P>The default constructor contains a <CODE>NULL FILE</CODE> pointer. It can
+be opened with the <CODE>open()</CODE> member function.</P>
+
+<H4><CODE>File(const std::string&amp; fname, Open_Mode m)</CODE></H4>
+<P>This constructor opens the file <CODE>fname</CODE>. The
+<CODE>Open_Mode</CODE> type is an enumerator with four possible values:</P>
+
+<UL>
+  <LI><CODE>IN</CODE> - Open the file for reading. The file must exist.</LI>
+  <LI><CODE>OUT</CODE> - Create a new file for writing. If a file with the
+  given name already exists, it is erased.</LI>
+  <LI><CODE>IN_OUT</CODE> - Open the file for both reading and writing. The
+  file must exist.</LI>
+  <LI><CODE>IN_OUT_OW</CODE> - Create a new file for both reading and writing.
+  If a file with the given name already exists, it is erased.</LI>
+</UL>
+
+<P>The file being opened should not already be open. Use the
+<CODE>is_open()</CODE> member function after construction to make sure the file
+was opened successfully.</P>
+
+<H4><CODE>~File()</CODE></H4>
+<P>The destructor closes the file if it is open.</P>
+
+<H3>8.3.2. Member Functions.</H3>
+
+<H4><CODE>bool open(const std::string&amp; fname, Open_Mode m)</CODE></H4>
+<P>Opens the file <CODE>fname</CODE>. The parameter <CODE>m</CODE> determines
+the mode the file is opened in. The file must not already be open. If the
+<CODE>File</CODE> object this is called for is already in use, the file it is
+accessing is closed before the new file is opened. This function returns
+<CODE>true</CODE> if the file was opened successfully, and <CODE>false</CODE>
+otherwise.</P>
+
+<H4><CODE>bool close()</CODE></H4>
+<P>This closes the file if it is open. If for some reason it cannot close the
+file, then <CODE>false</CODE> is returned. Otherwise the return value is
+<CODE>true</CODE>.</P>
+
+<H4><CODE>offset_type size() const</CODE></H4>
+<P>Returns the current size, in bytes, of the file.</P>
+
+<H4><CODE>bool is_open() const</CODE></H4>
+<P>Returns <CODE>true</CODE> if the file is currently open, and
+<CODE>false</CODE> otherwise.</P>
+
+<H4><CODE>bool fail() const</CODE></H4>
+<P>Returns <CODE>true</CODE> if the file is not open, or if there was an error
+which has not been cleared. Returns <CODE>false</CODE> otherwise.</P>
+
+<H4><CODE>bool eof() const</CODE></H4>
+<P>Returns <CODE>true</CODE> if the file is at the end of file. Returns
+<CODE>false</CODE> otherwise.</P>
+
+<H4><CODE>bool good() const</CODE></H4>
+<P>Returns <CODE>true</CODE> if the file is open and there are no errors
+Returns <CODE>false</CODE> otherwise.</P>
+
+<H4><CODE>Open_Mode mode() const</CODE></H4>
+<P>Returns the mode the file was opened under.</P>
+
+<H4><CODE>bool flush()</CODE></H4>
+<P>If the file is open, this flushes the stream. Returns <CODE>false</CODE> if
+an error occurs, and <CODE>true</CODE> otherwise.</P>
+
+<H4><CODE>bool clear()</CODE></H4>
+<P>Clears any error or end of file flags which have been set.</P>
+
+<H4><CODE>offset_type tell() const</CODE></H4>
+<P>Returns the position in the file. If the file is not open, or an error
+occurs, -1 is returned.</P>
+
+<H4><CODE>bool seek(offset_type offset, int origin = SEEK_CUR)</CODE></H4>
+<P>Seeks to location <CODE>offset</CODE> in the file. The optional parameter
+<CODE>origin</CODE> determined where this offset is relative to. The possible
+values are <CODE>SEEK_SET</CODE> to seek from the beginning of the file,
+<CODE>SEEK_CUR</CODE> to seek from the current location, and
+<CODE>SEEK_END</CODE> to seek from the end of the file. The default value is
+<CODE>SEEK_CUR</CODE>. The return value is <CODE>true</CODE> if the seek
+operation was successful, and <CODE>false</CODE> if it was not.</P>
+
+<H4><CODE>void rewind()</CODE></H4>
+<P>Returns to the beginning of the file.</P>
+
+<H4><CODE>template &lt;class T&gt; offset_type read(Vector&lt;T&gt;&amp; x,
+offset_type s = 1)</CODE></H4>
+<P>This reads data in from the file into the vector <CODE>x</CODE>. Reading is
+performed until either the end of the vector, or the end of the file, is
+reached. The return value is the number of elements read in (not the number of
+bytes). The optional parameter <CODE>s</CODE> allows for skipping elements of
+the file between reads, which may be useful if you need to read in one column of
+a matrix stored in a file in row-major format. <CODE>s</CODE> must be greater
+than zero. This function returns -1 if something goes wrong. Note that reading
+will be much faster if both <CODE>s</CODE> and the stride of <CODE>x</CODE>
+are 1.</P>
+
+<H4><CODE>template &lt;class T&gt; offset_type write(const Vector&lt;T&gt;&amp;
+x, offset_type s = 1)</CODE></H4>
+<P>This writes data to the file from the vector <CODE>x</CODE>. The return
+value is the number of elements written (not the number of bytes). The optional
+parameter <CODE>s</CODE> allows for skipping elements of the file between
+writes, which may be useful if you need to write out one column of a matrix
+stored in a file in row-major format. <CODE>s</CODE> must be greater than
+zero. This function returns -1 if something goes wrong. Note that writing
+will be much faster if both <CODE>s</CODE> and the stride of <CODE>x</CODE>
+are 1. If <CODE>s</CODE> is not equal to 1, then this operation may not write
+past the current end of the file. Instead you should first pad the file out to
+its full size.</P>
+
+<H4><CODE>template &lt;class T&gt; offset_type zero_fill(offset_type
+n)</CODE></H4>
+<P>This writes <CODE>n</CODE> zero values of type <CODE>T</CODE> to the file,
+starting at the current location. If <CODE>n < 1</CODE> it does nothing and
+returns 0. If an error occurs -1 is returned. Otherwise the return value is the
+number of values written to the file.</P>
+
+<H4><CODE>operator void *() const</CODE></H4>
+<P>This returns a null pointer if there has been an error, or if the file is not
+open. Otherwise it returns a non-zero void pointer which can then be converted
+to <CODE>bool</CODE> for conditional statements.</P>
+
+<H4><CODE>bool operator!() const</CODE></H4>
+<P>This is equivelent to calling <CODE>fail()</CODE>.<P> 
+
+<H4><CODE>static bool remove(const std::string&amp; fname)</CODE></H4>
+<P>Removes the file <CODE>fname</CODE>. Returns <CODE>true</CODE> if the file
+was successfully deleted, and <CODE>false</CODE> otherwise.</P>
+
+<H4><CODE>static bool rename(const std::string&ampl; oldname,
+const std::string&amp; newname)</CODE></H4>
+<P>Renames the file or directory <CODE>oldname</CODE> to <CODE>newname</CODE>.
+Returns <CODE>true</CODE> if the rename was successful, and
+<CODE>false</CODE> otherwise.</P>
+
+
+<P><A HREF="filter.htm">Next Section</A></P>
+<P><A HREF="vecmat.htm">Back to Index</A></P>
+
+</BODY>
+</HTML>

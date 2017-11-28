@@ -1,0 +1,561 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"
+  "http://www.w3.org/TR/REC-html40/transitional.dtd">
+<HTML>
+<HEAD>
+  <TITLE>VecMat - The Matrix Template Class</TITLE>
+  <META HTTP-EQUIV="Content-Type" CONTENT="text/html;charset=iso-8859-1">
+  <META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+  <META NAME="Author" CONTENT="Kevin Dolan">
+  <LINK HREF="vecmat.css" REL="stylesheet" TYPE="text/css">
+</HEAD>
+
+<BODY>
+
+<H1>The Matrix Template Class.</H1>
+
+<H2>4. Matrix&lt;T&gt;</H2>
+
+<P>This is a templatized class for viewing data as a matrix. A matrix, in
+general, does not have its own data. Instead, it views a block of data in a
+certain way. It is therefore possible to have multiple matrices and vectors
+that view the same data. Class <CODE>T</CODE> must have a public default
+constructor, copy constructor, destructor, and assignment operator. Many of the
+operators and member functions will only work for types that behave like
+standard numeric types. When a matrix is destroyed it will deallocate the data
+it views only if it is the only remaining owner of that data.</P>
+
+<P>This class makes use of the <A HREF="traits.htm"><CODE>Traits</CODE></A>
+support template class for determining properties of the value type being used,
+such as whether the type has a non-trivial constructor, whether or not the type
+is a pointer, and the real type associated with complex types.</P>
+
+<H3>4.1. Embedded Types.</H3>
+
+<P>The Matrix class provides several embedded typedefs. These are provided both
+for simplifying the code within the class definition, and also for use in
+templatized functions which may need extra type information.</P>
+
+<DIV CLASS=clb>
+<P>typedef VM::Allocator&lt;T&gt; allocator_type;</P>
+<P>typedef typename allocator_type::value_type value_type;</P>
+<P>typedef typename allocator_type::pointer pointer;</P>
+<P>typedef typename allocator_type::const_pointer const_pointer;</P>
+<P>typedef typename allocator_type::size_type size_type;</P>
+<P>typedef typename allocator_type::difference_type difference_type;</P>
+<P>typedef typename allocator_type::reference reference;</P>
+<P>typedef typename allocator_type::const_reference const_reference;</P>
+<P>typedef typename Traits&lt;T&gt;::real_type real_type;</P>
+<P>typedef typename Vector&lt;T&gt;::iterator iterator;</P>
+<P>typedef typename Vector&lt;T&gt;::const_iterator const_iterator;</P>
+</DIV>
+<P>Note that <CODE>VM::Allocator</CODE> is simply whichever allocator class you
+have instructed the <EM>VecMat</EM> software to use. By default it is
+<CODE>std::allocator</CODE>.</P>
+ 
+<H3>4.2. Constructors.</H3>
+
+<H4><CODE>Matrix&lt;T&gt;()</CODE></H4>
+<P>This constructs an empty matrix.</P>
+
+<H4><CODE>Matrix&lt;T&gt;(size_t n, size_t m)</CODE></H4>
+<P>This constructor creates a matrix of <CODE>n</CODE> rows and <CODE>m</CODE>
+columns. If <CODE>T</CODE> is a standard numeric type, pointer, or any type
+without a constructor, including <CODE>std::complex&lt;T&gt;</CODE>, then the
+matrix will be initialized to zero. If not, then the elements are initialized
+with a default constructed object. This constructor uses the
+<CODE>VMTraits&lt;T&gt;::zero()</CODE> function to obtain the value to
+initialize to. Use of this constructor is therefore equivalent to
+<CODE>Matrix&lt;T&gt; x(VMTraits&lt;T&gt;::zero(), n, m)</CODE>.</P>
+
+<H4><CODE>Matrix&lt;T&gt;(NoInit, size_t n, size_t m)</CODE></H4>
+<P>If class <CODE>T</CODE> has a specialized version of the
+<CODE>VMTraits&lt;T&gt;</CODE> structure, with the flag <CODE>is_simple</CODE>
+set to <CODE>true</CODE>, then the elements will not be initialized at all.
+This flag is set for all the standard numeric types, including
+<CODE>std::complex&lt;float&gt;</CODE> and <CODE>std::complex&lt;double&gt;</CODE>,
+as well as all pointer types. For non-simple types, this is equivelent to the
+<CODE>Matrix&lt;T&gt;(size_t n, size_t m)</CODE> constructor.</P>
+
+<H4><CODE>Matrix&lt;T&gt;(const T&amp; a, size_t n, size_t m)</CODE></H4>
+<P>This creates a matrix of <CODE>n</CODE> rows and <CODE>m</CODE> columns,
+with each element initialized to the value <CODE>a</CODE>. This initialization
+is done through the copy constructor of class <CODE>T</CODE>.</P>
+
+<H4><CODE>Matrix&lt;T&gt;(T* a, size_t n, size_t m, ptrdiff_t rs = 0,
+ptrdiff_t cs = 1)</CODE></H4>
+<P>This creates a matrix of <CODE>n</CODE> rows and <CODE>m</CODE> columns
+from a C-style array given by the pointer <CODE>a</CODE>. The data is not
+copied. Instead the matrix is now a non-owner view of the data. It is up to the
+user to make sure the array actually has the required number of elements. The
+optional parameters <CODE>rs</CODE> and <CODE>cs</CODE> indicate the number
+of elements seperating rows and columns respectively. If neither optional
+parameter is given, or the row-stride is given as zero, then the row-stride
+will automatically be set to <CODE>m * cs</CODE>.</P>
+
+<H4><CODE>Matrix&lt;T&gt;(const Matrix&lt;T&gt;&amp; rhs)</CODE></H4>
+<P>The copy constructor makes a shallow copy of the matrix <CODE>rhs</CODE>.
+This means that it views the same data as <CODE>rhs</CODE>, in exactly the same
+way. If <CODE>rhs</CODE> is not an owner of its data, then the new matrix will
+not be either. The primary purpose of this constructor is for making permanent
+versions of returned temporary matrices, for example:</P>
+
+<DIV CLASS=sc>
+<P>Mat_DP x(4.5, 10, 5), y(2.5, 10, 5);</P>
+<P>Mat_DP z(x + y);</P>
+</DIV>
+
+<H4><CODE>Matrix&lt;complex&lt;T&gt; &gt;(const Matrix&lt;T&gt;&amp; re,
+const Matrix&lt;T&gt;&amp; im)</CODE></H4>
+<P>This creates a complex matrix from two real matrices. It will only work
+properly for the following types: <CODE>float</CODE> and
+<CODE>double</CODE>.</P>
+
+<H4><CODE>Matrix&lt;complex&lt;T&gt; &gt;(const Matrix&lt;T&gt;&amp; re,
+const T&amp; im)</CODE></H4>
+<P>This creates a complex matrix from a real matrix, and a scalar. It also only
+works for the types above.</P>
+
+<H3>4.3. Member Functions.</H3>
+
+<H4><CODE>Matrix&lt;T&gt;& apply(void (*fn)(T&amp; x))</CODE></H4>
+<P>This function applies the function <CODE>fn</CODE> to each element of the
+matrix it is called for. This is intended for unary functions which take an
+argument by reference, and do something to that argument. This member function
+returns itself by reference, allowing for cascading.</P>
+
+<H4><CODE>Matrix&lt;T&gt;& apply(T (*fn)(T x))</CODE></H4>
+<P>This function applies the function <CODE>fn</CODE> to each element of the
+matrix it is called for. The function must take one argument of type
+<CODE>T</CODE>, and return a value that can be cast to type <CODE>T</CODE>.
+This member function returns itself by reference, allowing for cascading.</P>
+
+<H4><CODE>Matrix&lt;T&gt;& apply(T (*fn)(const T&amp; x))</CODE></H4>
+<P>This function applies the function fn to each element of the matrix it is
+called for. The function must take one argument of type <CODE>T&amp;</CODE>,
+and return a value that can be cast to type <CODE>T</CODE>. This member
+function returns itself by reference, allowing for cascading.</P>
+
+<H4><CODE>Matrix&lt;T&gt; copy() const</CODE></H4>
+<P>This function returns a deep copy of the matrix it is called for. This means
+that the returned matrix will be the only object referencing its data, and that
+its column stride will be one, and its row stride will be equal to the number
+of columns. Copying is done with the assignment operator of type
+<CODE>T</CODE>.</P>
+
+<H4><CODE>bool is_owner() const</CODE></H4>
+<P>Returns <CODE>true</CODE> if the matrix is an owner of its data, and
+<CODE>false</CODE> otherwise.</P>
+
+<H4><CODE>bool is_deep() const</CODE></H4>
+<P>Returns <CODE>true</CODE> if the following criteria are met:</P>
+<UL>
+  <LI>The matrix must be the only owner of its data.</LI>
+  <LI>The matrix must have a row-stride equal to the number of columns, and a
+  column-stride of one.</LI>
+  <LI>The matrix must start at the beginning of its data object, and have the
+  same total size as the data object.</LI></UL>
+
+<P>If any of these criteria are not met, <CODE>false</CODE> is returned.</P>
+
+<H4><CODE>bool empty() const</CODE></H4>
+<P>Returns <CODE>true</CODE> if the matrix is empty, and <CODE>false</CODE>
+otherwise.</P>
+
+<H4><CODE>void make_deep()</CODE></H4>
+<P>This function causes a matrix to become a deep copy of itself. It now
+references its own data, has a row-stride equal to its number of columns, and a
+column-stride of one. Its original data is not changed, although it is
+deallocated if the matrix it is called for is the only object referencing it.
+If new memory is allocated, then copying is done with the assignment operator of
+type <CODE>T</CODE>.</P>
+
+<H4><CODE>void ref(const Matrix&lt;T&gt;&amp; x)</CODE></H4>
+<P>This causes the matrix it is called for to become a shallow copy of
+<CODE>x</CODE>. If <CODE>x</CODE> is not an owner of its data, then the matrix
+will not be either. This is very useful for setting a matrix to a returned
+temporary, for example:</P>
+
+<DIV CLASS=sc>
+<P>Mat_INT x(2, 10, 20), y;</P>
+<P>y.ref(x + 2);</P>
+</DIV>
+
+<P>Note that telling a matrix to reference itself is ok. This simply does
+nothing.</P>
+
+<H4><CODE>void view(const Matrix&lt;T&gt;&amp; x)</CODE></H4>
+<P>This functions identically to <CODE>ref()</CODE>, except that the
+matrix will not be an owner of the data referenced. Note that this means that
+if the last owner of its data is destroyed, this matrix will become
+invalidated. If <CODE>x</CODE> is not an owner of its data, then this functions
+exactly like <CODE>ref()</CODE>. Telling a matrix to view itself does nothing.
+However, telling a matrix which owns its data, and which is the only owner of
+its data, to view a temporary view of itself, is an error, as the data will be
+deallocated after the function call. For example, consider the following:</P>
+
+<DIV CLASS=sc>
+<P>Mat_DP x(5.0, 2, 10);</P>
+<P>x.view(x.transpose());</P>
+</DIV>
+
+<P>The <CODE>view()</CODE> function call here would first create a temporary
+matrix which views the transpose of <CODE>x</CODE>, and then make
+<CODE>x</CODE> a non-owner view of it. This leaves the temporary matrix as the
+only owner of the data. When that temporary matrix is destroyed, the data is
+deallocated, invalidating <CODE>x</CODE>.</P>
+
+<H4><CODE>void view(T* p, ptrdiff_t n, ptrdiff_t m, ptrdiff_t rs = 0, cs =
+1)</CODE></H4>
+<P>This function will cause a matrix to view the data pointed to by
+<CODE>p</CODE>. The matrix will not be an owner of the data.  Note that this
+means that if the data is deallocated, this matrix will become invalidated. The
+optional parameters set the row and column strides to be used. If rs is not
+given, or is set to zero, then the row-stride will be assumed to be <CODE>m *
+cs</CODE>.</P>
+
+<H4><CODE>void clear()</CODE></H4>
+<P>This sets the size of the matrix to zero (zero rows and zero columns). If
+the matrix is the only owner of its data, the data is deallocated.</P>
+
+<H4><CODE>void reshape(size_t n, size_t m)</CODE></H4>
+<P>This changes the dimensions of the matrix to <CODE>(n, m)</CODE>. The matrix
+no longer views its old data. Instead, it has new data of its own, whose
+elements are initialized with the default constructor of type <CODE>T</CODE>.
+If class <CODE>T</CODE> has a specialized version of the
+<CODE>VMTraits&lt;T&gt;</CODE> structure, with the flag <CODE>is_simple</CODE>
+set to <CODE>true</CODE>, then the elements will not be initialized at all.</P>
+
+<H4><CODE>void resize(size_t n, size_t m)</CODE></H4>
+<P>The same as <CODE>reshape()</CODE>, except that the data is copied. If the
+matrix is made shorter along either dimension, then the copied data is
+truncated. If it is made larger in either of its dimensions, then the new
+values will be set to zero with the <CODE>VMTraits&lt;T&gt;::zero()</CODE>
+function. Copying is done with the assignment operator of type
+<CODE>T</CODE>.</P>
+
+<H4><CODE>Matrix submatrix(ptrdiff_t rb, ptrdiff_t cb, ptrdiff_t n, size_t m,
+ptrdiff_t rs = 1, ptrdiff_t cs = 1) const</CODE></H4>
+<P>This returns a new view of the data that is a submatrix of the current view.
+<CODE>(rb, cb)</CODE> is the element that the submatrix should start with,
+<CODE>n</CODE> and <CODE>m</CODE> are the dimensions of the submatrix, and
+<CODE>rs</CODE> and <CODE>cs</CODE> are the number of rows and columns to skip
+between rows and columns of the submatrix. Note that <CODE>rs</CODE> and
+<CODE>cs</CODE> can be negative. For example, the following views a matrix in
+reverse order:</P>
+
+<DIV CLASS=sc>
+<P>Mat_DP x(10, 20);</P>
+<P>Mat_DP y = x.submatrix(9, 19, 10, 20, -1, -1);</P>
+</DIV>
+
+<P>If the matrix is not an owner of its data, the returned submatrix will not
+be either.</P>
+
+<H4><CODE>Matrix&lt;T&gt; real() const</CODE></H4>
+<P>This returns the real part of a <CODE>complex&lt;T&gt;</CODE> matrix. Note
+that this returns a non-owner view of the data, and not a deep copy. To make a
+deep copy, either use the <CODE>copy()</CODE> member function, or use the
+global <CODE>real()</CODE> function instead. Note also that this function uses
+pointer casting to make the view. This should work on all implementations for
+<CODE>complex&lt;float&gt;</CODE> and <CODE>complex&lt;double&gt;</CODE>.
+Attempting to use it with other complex types, or with non-complex types, will
+almost certainly result in errors. If you want the real or imaginary part of
+complex matrix of some other type, then use the global functions instead. They
+do not use pointer casting.</P>
+
+<H4><CODE>Matrix&lt;T&gt; imag() const</CODE></H4>
+<P>This returns the imaginary part of a <CODE>complex&lt;T&gt;</CODE> matrix.
+The same limitations apply as for <CODE>real()</CODE>.</P>
+
+<H4><CODE>size_t nrows() const</CODE></H4>
+<P>This returns the number of rows.</P>
+
+<H4><CODE>size_t ncols() const</CODE></H4>
+<P>This returns the number of columns.</P>
+
+<H4><CODE>ptrdiff_t row_stride() const</CODE></H4>
+<P>This returns the row-stride of the matrix.</P>
+
+<H4><CODE>ptrdiff_t col_stride() const</CODE></H4>
+<P>This returns the column-stride of the matrix.</P>
+
+<H4><CODE>T* data()</CODE></H4>
+<P>This returns a pointer to the beginning of the matrix's data. It is up to
+the user to keep track of the row and column stride.</P>
+
+<H4><CODE>const T* data() const</CODE></H4>
+<P>The constant version of this member function returns a constant pointer.</P>
+
+<H4><CODE>Matrix&lt;T&gt; transpose() const</CODE></H4>
+<P>This returns a view of the transpose of the matrix. If the matrix is not an
+owner of its data, the returned matrix will not be either.</P>
+
+<H4><CODE>Vector&lt;T&gt; row(ptrdiff_t i) const</CODE></H4>
+<P>This creates a vector view of the <CODE>i</CODE>th row of the matrix. If the
+matrix is not an owner of its data, the returned vector will not be either.</P>
+
+<H4><CODE>Vector&lt;T&gt; column(ptrdiff_t j) const</CODE></H4>
+<P>This creates a vector view of the <CODE>j</CODE>th column of the matrix. If
+the matrix is not an owner of its data, the returned vector will not be
+either.</P>
+
+<H4><CODE>Vector&lt;T&gt; diag() const</CODE></H4>
+<P>This creates a vector view of the diagonal of a square matrix.  If the
+matrix is not an owner of its data, the returned vector will not be either. If
+the matrix is not square, then the major diagonal is viewed.</P>
+
+<H4><CODE>void swap(Matrix&lt;T&gt;&amp; a)</CODE></H4>
+<P>This swaps the values in matrix <CODE>a</CODE> with those of the matrix it
+is called for. The two matrices must have the same dimensions. Note that the
+<CODE>std::swap()</CODE> function provided by the <EM>Standard Template
+Library</EM> will not work with matrices.</P>
+
+<H4><CODE>void swap_views(Matrix&lt;T&gt;&amp; a)</CODE></H4>
+<P>This swaps the matrix <CODE>a</CODE> with the matrix it is called for. This
+is done by simply pointing each matrix at the other one's data. This is much
+more efficient than <CODE>swap()</CODE>, and the matrices do not have to be
+the same dimensions, but it only changes the views. The actual data, and any
+other objects viewing that data, are unaffected.</P>
+
+<H4><CODE>Vector&lt;T&gt; unwrap() const</CODE></H4>
+<P>This takes a matrix that is in contiguous order, and creates a vector view.
+This vector will view an <CODE>n</CODE> by <CODE>m</CODE> matrix such that
+<CODE>V[i * m + j] = M(i, j)</CODE> or <CODE>V[i + j * n] = M(i, j)</CODE>,
+depending on whether the matrix is in row-major or column-major format. This
+requires that <CODE>rs == cs * m</CODE> for row-major format, or
+<CODE>cs == rs * n</CODE> for column-major format. If this requirement is not
+met, then a run-time error will occur. If the matrix is not an owner of its
+data, the returned vector will not be either.</P>
+
+<H4><CODE>Vector&lt;T&gt;::iterator row_begin(ptrdiff_t i)</CODE></H4>
+<P>This returns an iterator to the beginning of row <CODE>i</CODE> of the
+matrix.</P>
+
+<H4><CODE>Vector&lt;T&gt;::iterator row_end(ptrdiff_t i)</CODE></H4>
+<P>This returns an iterator to the end of row <CODE>i</CODE> of the matrix.</P>
+
+<H4><CODE>Vector&lt;T&gt;::iterator col_begin(ptrdiff_t j)</CODE></H4>
+<P>This returns an iterator to the beginning of column <CODE>j</CODE> of the
+matrix.</P>
+
+<H4><CODE>Vector&lt;T&gt;::iterator col_end(ptrdiff_t j)</CODE></H4>
+<P>This returns an iterator to the end of column <CODE>j</CODE> of the
+matrix.</P>
+
+<H4><CODE>Vector&lt;T&gt;::const_iterator row_begin(ptrdiff_t i) const</CODE></H4>
+<P>This returns a constant iterator to the beginning of row <CODE>i</CODE> of
+the matrix.</P>
+
+<H4><CODE>Vector&lt;T&gt;::const_iterator row_end(ptrdiff_t i) const</CODE></H4>
+<P>This returns a constant iterator to the end of row <CODE>i</CODE> of the
+matrix.</P>
+
+<H4><CODE>Vector&lt;T&gt;::const_iterator col_begin(ptrdiff_t j) const</CODE></H4>
+<P>This returns a constant iterator to the beginning of column <CODE>j</CODE>
+of the matrix.</P>
+
+<H4><CODE>Vector&lt;T&gt;::const_iterator col_end(ptrdiff_t j) const</CODE></H4>
+<P>This returns a constant iterator to the end of column <CODE>j</CODE> of the
+matrix.</P>
+
+<H4><CODE>ptrdiff_t read(istream&amp; in, File_Mode fm = TXT)</CODE></H4>
+<P>This reads the contents of a stream into the matrix. Data is read from the
+stream in row-major order until either the stream ends, or the end of the matrix
+is reached. This may result in the stream being read to the end, so you may
+need to use the <CODE>clear()</CODE> member function if you wish to continue
+using the stream. The return value is the number of values read. If the end of
+the stream is reached before the end of the matrix, then the remaining portion
+of the matrix is not affected. The optional parameter <CODE>fm</CODE> is used
+to indicate whether the stream is in text or binary mode. The argument is of
+the type <CODE>File_Mode</CODE> which is an enumerator type defined in
+"vm_basic.h". It has two values: <CODE>TXT</CODE> and <CODE>BIN</CODE>. The
+default is <CODE>TXT</CODE>. <CODE>BIN</CODE> should be used if the stream is
+an fstream which was opened in binary mode. Note that in binary mode, if the
+file ends in the middle of reading in a value, then that value will be
+nonsense.</P>
+
+<H4><CODE>ptrdiff_t read(const string&amp; fname, File_Mode fm =
+TXT)</CODE></H4>
+<P>This reads the contents of a file, whose name is stored in the string
+<CODE>fname</CODE>. As with the <CODE>istream</CODE> version, values are read
+until either the end of the file is reached, or until the end of the matrix is
+reached. If reading of the file was successful, then the return value is the
+number of values read. If the file could not be opened, or it contains no data,
+then the return value is -1. In the case of binary files, if the file length in
+bytes is not an integer multiple of the size of the type being read, then no
+values are read and a value of -2 is returned. The optional parameter
+<CODE>fm</CODE> allows reading in binary format (<CODE>fm = BIN</CODE>). Text
+format is the default.</P> 
+
+<H4><CODE>void write(ostream&amp; out, File_Mode fm = TXT) const</CODE></H4>
+<P>This outputs the contents of the matrix to a stream. The elements within each
+row are separated with a tab character, and the rows are separated with
+carriage return delimiters. As with <CODE>read()</CODE>, the optional
+parameter <CODE>fm</CODE> indicates whether to use text or binary formatting
+for the stream.</P>
+
+<H4><CODE>void write(const string&amp; fname, File_Mode fm = TXT)
+const</CODE></H4>
+<P>This outputs the contents of the matrix to a file. The optional parameter
+<CODE>fm</CODE> should be set to <CODE>BIN</CODE> to output in binary format.
+Text format is the default.</P>
+ 
+<H4><CODE>template &lt;class G&gt; Matrix&lt;T&gt;& fill(G
+gen)</CODE></H4>
+<P>This function fills the matrix with values from the generator
+<CODE>gen</CODE>. Class <CODE>G</CODE> must have a function call operator
+which takes no arguments, and returns a value that can be cast to type
+<CODE>T</CODE>. This includes the four random number generator classes
+<CODE>BaseGen</CODE>, <CODE>IntGen</CODE>, <CODE>UniformGen</CODE>, and
+<CODE>NormalGen</CODE>. Ordinary function pointers can be passed as well, but
+note that the compiler will not be able to resolve the function if it is
+overloaded. This member function returns itself by reference, allowing for
+cascading.</P>
+
+<H4><CODE>template &lt;class G&gt; Matrix&lt;T&gt;& transform(F
+fn)</CODE></H4>
+<P>This function applies the function object <CODE>fn</CODE> to each element
+of the matrix it is called for. Class <CODE>F</CODE> must have a function call
+operator which takes one argument of type <CODE>T</CODE>, and returns a value
+that can be cast to type <CODE>T</CODE>. Ordinary function pointers can be
+passed as well, but note that the compiler will not be able to resolve the
+function if it is overloaded. This member function returns itself by reference,
+allowing for cascading.</P>
+
+<H4><CODE>template &lt;class U&gt; Matrix&lt;U&gt; convert() const</CODE></H4>
+<P>This creates a matrix of type <CODE>U</CODE> from a matrix of type
+<CODE>T</CODE>. It must be possible to explicitly cast type <CODE>T</CODE> to
+type <CODE>U</CODE>. Since the type <CODE>U</CODE> cannot be derived from the
+function call, it must be specified. Example:</P>
+
+<DIV CLASS=sc>
+<P>Mat_DP x(4.5, 10, 4);</P>
+<P>Mat_SP y = x.convert&lt;float&gt;();</P>
+</DIV>
+
+<H4><CODE>template &lt;class U&gt; Matrix&lt;U&gt; shallow_cast()
+const</CODE></H4>
+<P>This creates a shallow copy of the matrix it is called for, but of type
+<CODE>Matrix&lt;U&gt;</CODE>. This is done using pointer casting, which means
+the new matrix views the same data as the original, but views it as data of
+type <CODE>U</CODE> instead of as type <CODE>T</CODE>. For example, the
+internal representation of <CODE>int</CODE> and <CODE>long</CODE> is the same
+on many platforms. This function allows you to view a matrix of type
+<CODE>int</CODE> as a matrix of type <CODE>long</CODE>, without making a
+separate copy of the data. Types <CODE>T</CODE> and <CODE>U</CODE> must have
+the same size. The returned matrix is not an owner of the data, so there is no
+danger of the data elements being destroyed by the wrong destructor. However
+using pointer casts in this way is not supported by the <EM>C++</EM> standard,
+so it is up to the user to make sure this will work on their implementation.
+Since the type <CODE>U</CODE> cannot be derived from the function call, it must
+be specified. Example:</P>
+
+<DIV CLASS=sc>
+<P>Mat_INT x(4.5, 10, 4);</P>
+<P>Mat_UINT y = x.shallow_cast&lt;unsigned int&gt;();</P>
+</DIV>
+
+<H3>4.4. Member Operators.</H3>
+
+<H4><CODE>Matrix&lt;T&gt;&amp; operator=(const Matrix&lt;T&gt;&amp;
+rhs)</CODE></H4>
+<P>This uses the assignment operator of type <CODE>T</CODE> to do an
+element-by-element copy of <CODE>rhs</CODE> to the matrix it is called for,
+which is the left hand side of the expression. The matrices must have the same
+dimensions. Note that no checks for aliasing are made. If the matrices view the
+same block of data, and those views overlap, the results may be very
+unexpected.</P>
+
+<H4><CODE>Matrix&lt;T&gt;&amp; operator=(const T&amp; rhs)</CODE></H4>
+<P>This uses the assignment operator of type <CODE>T</CODE> to copy
+<CODE>rhs</CODE> to each element of the matrix it is called for.</P>
+
+<DIV CLASS=clb>
+<P>Matrix&lt;T&gt;&amp; operator+=(const Matrix&lt;T&gt;&amp; rhs)</P>
+<P>Matrix&lt;T&gt;&amp; operator-=(const Matrix&lt;T&gt;&amp; rhs)</P>
+<P>Matrix&lt;T&gt;&amp; operator*=(const Matrix&lt;T&gt;&amp; rhs)</P>
+<P>Matrix&lt;T&gt;&amp; operator/=(const Matrix&lt;T&gt;&amp; rhs)</P>
+<P>Matrix&lt;T&gt;&amp; operator%=(const Matrix&lt;T&gt;&amp; rhs)</P>
+<P>Matrix&lt;T&gt;&amp; operator&amp;=(const Matrix&lt;T&gt;&amp; rhs)</P>
+<P>Matrix&lt;T&gt;&amp; operator^=(const Matrix&lt;T&gt;&amp; rhs)</P>
+<P>Matrix&lt;T&gt;&amp; operator|=(const Matrix&lt;T&gt;&amp; rhs)</P>
+<P>Matrix&lt;T&gt;&amp; operator&gt;&gt;=(const Matrix&lt;T&gt;&amp; rhs)</P>
+<P>Matrix&lt;T&gt;&amp; operator&lt;&lt;=(const Matrix&lt;T&gt;&amp; rhs)</P>
+</DIV>
+
+<P>These operators use the arithmetic assignment operators of type
+<CODE>T</CODE> to do element-by-element arithmetic assignment. The matrices
+must have the same dimensions. Note that no checks for aliasing are made. If
+the matrices view the same block of data, and those views overlap, the results
+may be very unexpected.</P>
+
+<DIV CLASS=clb>
+<P>Matrix&lt;T&gt;&amp; operator+=(const T&amp; rhs),</P>
+<P>Matrix&lt;T&gt;&amp; operator-=(const T&amp; rhs),</P>
+<P>Matrix&lt;T&gt;&amp; operator*=(const T&amp; rhs),</P>
+<P>Matrix&lt;T&gt;&amp; operator/=(const T&amp; rhs),</P>
+<P>Matrix&lt;T&gt;&amp; operator%=(const T&amp; rhs),</P>
+<P>Matrix&lt;T&gt;&amp; operator&amp;=(const T&amp; rhs),</P>
+<P>Matrix&lt;T&gt;&amp; operator^=(const T&amp; rhs),</P>
+<P>Matrix&lt;T&gt;&amp; operator|=(const T&amp; rhs),</P>
+<P>Matrix&lt;T&gt;&amp; operator&gt;&gt;=(const T&amp; rhs),</P>
+<P>Matrix&lt;T&gt;&amp; operator&lt;&lt;=(const T&amp; rhs),</P>
+</DIV>
+
+<P>These operators use the arithmetic assignment operators of type
+<CODE>T</CODE> to perform the corresponding operation on the matrix.</P>
+
+<H4><CODE>Matrix&lt;T&gt; operator+() const</CODE></H4>
+<P>This returns a matrix such that each element is the result of applying the
+unary <CODE>+</CODE> operator to each element of the original matrix. This
+operator must be available for type <CODE>T</CODE>.</P>
+
+<H4><CODE>Matrix&lt;T&gt; operator-() const</CODE></H4>
+<P>This returns a matrix such that each element is the negation of the original
+value. The unary <CODE>-</CODE> operator must be available for type
+<CODE>T</CODE>.</P>
+
+<H4><CODE>Matrix&lt;bool&gt; operator!() const</CODE></H4>
+<P>This returns a matrix of <CODE>bool</CODE> values such that <CODE>B(i, j) =
+!M(i, j)</CODE>, where <CODE>B</CODE> is the returned matrix, and
+<CODE>M</CODE> is the original matrix. This operator must be available for type
+<CODE>T</CODE>.</P>
+
+<H4><CODE>Matrix&lt;T&gt; operator~() const</CODE></H4>
+<P>This returns a matrix by applying the <CODE>~</CODE> operator to each
+element. This operator must be available for type <CODE>T</CODE>.</P>
+
+<H4><CODE>T&amp; operator()(ptrdiff i, ptrdiff_t j)</CODE></H4>
+<P>Indexing. This returns a reference to the <CODE>(i, j)</CODE> element of the
+matrix.</P>
+
+<H4><CODE>const T&amp; operator()(ptrdiff_t i, ptrdiff_t j) const</CODE></H4>
+<P>The constant version of this operator returns a constant reference.</P>
+
+<H4><CODE>Vector&lt;T&gt;::iterator operator[](ptrdiff_t i)</CODE></H4>
+<P>This returns an iterator to the <CODE>i</CODE>th row of the matrix. This is
+identical to the <CODE>row_begin()</CODE> member function, except that
+bounds-checking on the row is only done if bounds-checking is enabled. It is
+provided to facilitate C-style indexing. Example:</P>
+
+<DIV CLASS=sc>
+<P>Mat_DP x(10,20);</P>
+<P>UniformGen gen(0);</P>
+<P>x.fill(gen);</P>
+<P>cout &lt;&lt; x[5][4];</P>
+</DIV>
+
+<P>This is less efficient that using the <CODE>()</CODE> operator, and is
+included to allow compatibility with software like <EM>Numerical Recipes in
+C++</EM>.</P>
+
+<H4><CODE>Vector&lt;T&gt;::const_iterator operator[](ptrdiff_t i)
+const</CODE></H4>
+<P>The constant version of this operator returns a constant iterator.</P>
+
+
+<P><A HREF="iterator.htm">Next Section</A></P>
+<P><A HREF="vecmat.htm">Back to Index</A></P>
+
+</BODY>
+</HTML>

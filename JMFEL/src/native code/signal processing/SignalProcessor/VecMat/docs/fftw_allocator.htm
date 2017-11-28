@@ -1,0 +1,114 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"
+  "http://www.w3.org/TR/REC-html40/transitional.dtd">
+<HTML>
+<HEAD>
+  <TITLE>FFTW Allocator Class</TITLE>
+  <META HTTP-EQUIV="Content-Type" CONTENT="text/html;charset=iso-8859-1">
+  <META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+  <META NAME="Author" CONTENT="Kevin Dolan">
+  <LINK HREF="vecmat.css" REL="stylesheet" TYPE="text/css">
+</HEAD>
+
+<BODY>
+
+<H2>15.3. fftw_allocator&lt;T&gt;</H2>
+
+<P>This is an <EM>STL</EM> style allocator class for use with the <EM>FFTW
+3.xx</EM> software. It uses the <CODE>fftw_malloc</CODE> and
+<CODE>fftw_free</CODE> functions for memory allocation and deallocation. It is
+designed to be used with the <EM>VecMat</EM> software, but is in no way
+dependant on the rest of the <EM>VecMat</EM> package, and can be used
+independently in any <EM>C++</EM> project which used the <EM>FFTW 3.xx</EM>
+software.</P>
+
+
+<H3>15.3.1. Typedefs.</H3>
+
+<P>The allocator provides several typedefs, as per the <EM>STL</EM>
+standard:</P>
+
+<DIV CLASS=clb>
+<P>typedef size_t          size_type</P>
+<P>typedef ptrdiff_t       difference_type</P>
+<P>typedef T               value_type</P>
+<P>typedef T*              pointer</P>
+<P>typedef const T*        const_pointer</P>
+<P>typedef T&amp;          reference</P>
+<P>typedef const T&amp;    const_reference</P>
+</DIV>
+
+<H3>15.3.2. Interface.</H3>
+
+<H4><CODE>fftw_allocator&lt;T&gt;()</CODE></H4>
+<P>Constructs an allocator for type <CODE>T</CODE>.</P>
+
+<H4><CODE>fftw_allocator&lt;T&gt;(const fftw_allocator&amp; alloc)</CODE></H4>
+<P>Copy constructor. Since the allocator has no state, this is equivalent to
+the default constructor.</P>
+
+<H4><CODE>fftw_allocator&lt;T&gt;&amp; operator=(const
+fftw_allocator&lt;T&gt;&amp; alloc)</CODE></H4>
+<P>Since the allocator has no state, the assignment operator does nothing.</P>
+
+<H4><CODE>template &lt;class U&gt; struct rebind {typedef
+fftw_allocator&lt;U&gt; other;};</CODE></H4>
+<P>This embedded structure allows allocators to be constructed for allocating
+any type.</P>
+
+<H4><CODE>pointer address(reference x) const</CODE></H4>
+<P>Returns the address of the object.</P>
+
+<H4><CODE>const_pointer address(const_reference x) const</CODE></H4>
+<P>Returns the address of the object.</P>
+
+<H4><CODE>pointer allocate(size_type n, const void *)</CODE></H4>
+<P>Calls the function <CODE>fftw_malloc(size_of(value_type) * n)</CODE>, and
+returns the pointer, explicitly cast to the appropriate type.</P>
+
+<H4><CODE>char *_Charalloc(size_type n)</CODE></H4>
+<P>Calls the function <CODE>fftw_malloc(n)</CODE>, and returns the pointer,
+explicitly cast to type <CODE>char *</CODE>.</P>
+
+<H4><CODE>void deallocate(void *p, size_type)</CODE></H4>
+<P>Calls the function <CODE>fftw_free(p)</CODE>.</P>
+
+<H4><CODE>void construct(pointer p, const_reference v)</CODE></H4>
+<P>Constructs an object of type <CODE>T</CODE> at address <CODE>p</CODE>, using
+the copy constructor of type <CODE>T</CODE>, and the argument
+<CODE>v</CODE>.</P>
+
+<H4><CODE>void destroy(pointer p)</CODE></H4>
+<P>Calls the destructor for the object of type <CODE>T</CODE> at address
+<CODE>p</CODE>.</P>
+
+<H4><CODE>size_type max_size() const</CODE></H4>
+<P>Returns the maximum number of objects of type <CODE>T</CODE> that could be
+allocated.</P>
+
+<H3>15.3.3. The <CODE>void</CODE> specialization.</H2>
+
+<P>The specialization for type <CODE>void</CODE> contains no member functions,
+and only a partial list of typedefs:</P>
+
+<DIV CLASS=clb>
+<P>typedef size_t          size_type</P>
+<P>typedef ptrdiff_t       difference_type</P>
+<P>typedef void            value_type</P>
+<P>typedef void*           pointer</P>
+<P>typedef const void*     const_pointer</P>
+</DIV>
+
+<H3>15.3.4. Global Equivalence Operators.</H2>
+
+<H4><CODE>template &lt;class T, class U&gt; bool operator==(const
+fftw_allocator&lt;T&gt;&amp;, const fftw_allocator&lt;U&gt;&amp;)</CODE></H4>
+<P>Always returns <CODE>true</CODE>.</P>
+
+<H4><CODE>template &lt;class T, class U&gt; bool operator!=(const
+fftw_allocator&lt;T&gt;&amp;, const fftw_allocator&lt;U&gt;&amp;)</CODE></H4>
+<P>Always returns <CODE>false</CODE>.</P>
+
+<P><A HREF="fftw3xx.htm">Back to FFTW</A></P>
+
+</BODY>
+</HTML>

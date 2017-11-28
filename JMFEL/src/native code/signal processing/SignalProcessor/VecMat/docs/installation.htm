@@ -1,0 +1,197 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"
+  "http://www.w3.org/TR/REC-html40/transitional.dtd">
+<HTML>
+<HEAD>
+  <TITLE>VecMat - Installation</TITLE>
+  <META HTTP-EQUIV="Content-Type" CONTENT="text/html;charset=iso-8859-1">
+  <META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+  <META NAME="Author" CONTENT="Kevin Dolan">
+  <LINK HREF="vecmat.css" REL="stylesheet" TYPE="text/css">
+</HEAD>
+
+<BODY>
+
+<H1>2. Installation.</H1>
+
+<P>The <EM>VecMat</EM> software consists of the following files.
+
+<TABLE>
+  <TR>
+    <TD><STRONG>vec_mat.h</STRONG></TD>
+    <TD><P>This includes the necessary library files, and then includes the
+    entire standard <EM>VecMat</EM> package. It does not include "random.h" or
+    "vm_filter.h". Nor does it include the wrappers for support for external
+    libraries such as <EM>Numerical Recipes in C++</EM>, <EM>FFTW</EM>,
+    <EM>CBLAS</EM>, or <EM>LAPACK</EM>.</P></TD></TR>
+  <TR>
+    <TD><STRONG>vm_basic.h</STRONG></TD>
+    <TD><P>This includes only the minimal portion of the <EM>VecMat</EM>
+    package required for basic vector and matrix functionality.</P></TD></TR>
+  <TR>
+    <TD><STRONG>vector.h</STRONG></TD>
+    <TD><P>This header file defines the <CODE>Vector&lt;T&gt;</CODE> class, the
+    <CODE>Vector&lt;T&gt;::iterator</CODE> class, and the
+    <CODE>Vector&lt;T&gt;::const_iterator</CODE> class. It is included by
+    "vm_basic.h".</P></TD></TR>
+  <TR>
+    <TD><STRONG>matrix.h</STRONG></TD>
+    <TD><P>This header file defines the <CODE>Matrix&lt;T&gt;</CODE> class. It
+    is inluded by "vm_basic.h".</P></TD></TR>
+  <TR>
+    <TD><STRONG>vm_types.h</STRONG>
+    <TD><P>This header file provides <CODE>typedef</CODE> declarations for
+    commonly used vector and matrix types. It is included by
+    "vm_basic.h".</P></TD></TR>
+  <TR>
+    <TD><STRONG>vm_traits.h</STRONG></TD>
+    <TD><P>This header file provides numeric traits for extracting useful
+    information about various types. It is used by several of the other header
+    files. It is included by "vm_basic.h".</P></TD></TR>
+  <TR>
+    <TD><STRONG>vm_math.h</STRONG></TD>
+    <TD><P>This header file provides overloaded operators for vectors and
+    matrices, and also provides overloaded math functions. It is included by
+    "vec_mat.h".</P></TD></TR>
+  <TR>
+    <TD><STRONG>vm_math.cxx</STRONG></TD>
+    <TD><P>This implementation file is included by the "vm_math.h" header
+    file.</P></TD></TR>
+  <TR>
+    <TD><STRONG>vm_io.h</STRONG></TD>
+    <TD><P>This header file provides overloaded streaming IO operators for
+    vectors and matrices, as well as support functions for reading and writing
+    binary data to and from files. It is included by "vec_mat.h".</P></TD></TR>
+  <TR>
+    <TD><STRONG>vm_io.cxx</STRONG></TD>
+    <TD><P>This implementation file is included by the "vm_io.h" header
+    file.</P></TD></TR>
+  <TR>
+    <TD><STRONG>vm_tools.h<STRONG></TD>
+    <TD><P>This header file provides several support functions and function
+    objects for use with vectors and matrices. It is included by
+    "vec_mat.h".</P></TD></TR>
+  <TR>
+    <TD><STRONG>vm_tools.cxx</STRONG></TD>
+    <TD><P>This implementation file is included by the "vm_tools.h" header
+    file.</P></TD></TR>
+  <TR>
+    <TD><STRONG>random.h</STRONG></TD>
+    <TD><P>This header file provides several pseudorandom number generators. It
+    is not included by default. If you wish to use it, you must include it
+    specifically. It can also be used independantly of the rest of the
+    software.</P></TD></TR>
+  <TR>
+    <TD><STRONG>vm_filter.h</STRONG></TD>
+    <TD><P>This header file provides a class for defining and working with
+    frequency domain digital filters. It is not included by default. If you
+    wish to use it, you must include it specifically.</P></TD></TR>
+  <TR>
+    <TD><STRONG>vm_fftw2.h</STRONG></TD>
+    <TD><P>This header file provides wrappers for using the <EM>FFTW-2.xx</EM>
+    software with vectors. It is included for backwards compatibility purposes
+    only. It is not included by default. If you wish to use it, you must
+    include it specifically.</P></TD></TR>
+  <TR>
+    <TD><STRONG>vm_fftw3.h</STRONG></TD>
+    <TD><P>This header file provides wrappers for using the <EM>FFTW-3.xx</EM>
+    software with vectors. It is not included by default. If you wish to use
+    it, you must include it specifically.</P></TD></TR>
+  <TR>
+    <TD><STRONG>fftw_allocator.h</STRONG></TD>
+    <TD><P>This header provides an allocator class which uses the <EM>FFTW</EM>
+    memory allocation functions. It is not included by default. If you wish to
+    use it, you should specify this in the "vm_basic.h" header file. This
+    allocator provides 16 byte alignment, which is needed for the
+    <CODE>FFTW</CODE> software to make use of <CODE>SSE</CODE> optimizations.
+    It can also be used independantly of the rest of the software.</P></TD></TR>
+  <TR>
+    <TD><STRONG>vm_allocator.h</STRONG></TD>
+    <TD><P>This header provides an allocator class which uses the <EM>new</EM>
+    and <CODE>delete</CODE> operators for memory allocation. It is not included
+    by default. If you wish to use it, you should specify this in the
+    "vm_basic.h" header file. Like the <CODE>FFTW</CODE> allocator class, it
+    provides memory with 16 byte alignment. On most platforms, the standard
+    allocator, which is used by default, only provides 8 byte
+    alignment.</P></TD></TR>
+  <TR>
+    <TD><STRONG>nrutil_vm.h</STRONG></TD>
+    <TD><P>This is a modified version of the <EM>Numerical Recipes in C++</EM>
+    header file "nrutil_nr.h". It is intended for using the <EM>VecMat</EM>
+    software in place of the <CODE>NRVec</CODE> and <CODE>NRMat</CODE> classes
+    provided by the <EM>NR</EM> software.</P></TD></TR>
+  <TR>
+    <TD><STRONG>nrtypes_vm.h</STRONG></TD>
+    <TD><P>This is a modified version of the <EM>Numerical Recipes in C++</EM>
+    header file "nrtypes_nr.h". It is intended for using the <EM>VecMat</EM>
+    software in place of the <CODE>NRVec</CODE> and <CODE>NRMat</CODE> classes
+    provided by the <EM>NR</EM> software.</P></TD></TR>
+  <TR>
+    <TD><STRONG>vm_bl_tools.h</STRONG></TD>
+    <TD><P>This header file provides wrappers for using the <EM>CBLAS</EM>
+    functions with vectors and matrices. It also provides new versions of the
+    the vector and matrix multiplication functions provided in "vm_tools.h",
+    which use the <EM>BLAS</EM> internally. Finally, it provides classes for
+    factoring matrices, solving systems of equations, and finding eigenvalues
+    and eigenvectors of matrices, using the <EM>LAPACK</EM> library functions.
+    It is not included by default. If you wish to use it, you must include it
+    specifically.</P></TD></TR>
+  <TR>
+    <TD><STRONG>vm_cblas.h</STRONG></TD>
+    <TD><P>This header file provides the wrappers for using the <EM>CBLAS</EM>
+    functions with vectors and matrices. It is included by the header file
+    "vm_bl_tools.h".</P></TD></TR>
+  <TR>
+    <TD><STRONG>vm_lapack.h</STRONG></TD>
+    <TD><P>This provides prototypes for the <EM>LAPACK</EM> functions used by
+    "vm_bl_tools.h", as well as some very low-level wrappers which are used by
+    the solver classes. It is included by "vm_bl_tools.h". This file assumes
+    that the <EM>LAPACK</EM> functions appear in the library as lower-case
+    symbols with an underscore at the end, such as "sgeev_".</P></TD></TR>
+  <TR>
+    <TD><STRONG>vm_lapack_mkl.h</STRONG></TD>
+    <TD><P>This provides some very low-level wrappers for the <EM>mkl</EM>
+    implementation of <EM>LAPACK</EM>, which are used by the solver classes.
+    It is included by "vm_bl_tools.h" if you define the precompiler macro
+    <CODE>USE_MKL</CODE>.</P></TD></TR>
+</TABLE>
+
+<P>To install this software, find or create a directory your compiler
+recognizes as an <EM>include</EM> directory. Create a subdirectory in that
+directory called "vm". Place all of the files in the "vm" subdirectory of this
+archive in this directory. To use the software, include either the file
+"vm/vec_mat.h" or "vm/vm_basic.h" in your source files.</P>
+
+<P>The "vec_mat.h" header file includes all of the necessary files for standard
+functionality. The "vm_filter.h" and "random.h" header files must be included
+seperately if you wish to use those features. The "vm_fftw3.h" header file
+should be included separately if you wish to use the wrappers for the
+<EM>FFTW-3.x</EM> software. The header file "vm_bl_tools.h" should be included
+seperately if you wish to use the wrappers for the <EM>BLAS</EM> and
+<EM>LAPACK</EM> software.</P>
+
+<P>The "vm_basic.h" header file can be included, instead of the "vec_mat.h"
+header, if you only want minimal vector and matrix functionality. This does not
+include the "vm_math.h", "vm_tools.h", or "vm_io.h" header files. Note that if
+you use this software with <EM>Numerical Recipes in C++</EM>, this is all that
+is included by the "NR.h" file.</P>
+
+<P>The "random.h" and "fftw_allocator.h" header files can be used independently
+of the rest of the software, if you wish.</P>
+
+<P>As of version 1.40, All functions and classes are now put into the
+namespace <CODE>VM</CODE>. The typedefs provided for common vector and matrix
+types are placed in the global namespace. Note that the <CODE>fftw_allocator</CODE>
+class is <EM>not</EM> placed in the <CODE>VM</CODE> namespace, as it is not,
+strictly speaking, a part of the <CODE>VecMat</CODE> software, and is only
+included for the sake of convenience.</P>
+
+<P>The <EM>Numerical Recipes</EM>, <EM>FFTW</EM>, <EM>CBLAS</EM> and
+<EM>LAPACK</EM> support files are also not required. See sections
+<A HREF="using_with_nr.htm">14</A>, <A HREF="fftw3xx.htm">15</A>, and
+<A HREF="bl_tools.htm">16</A> for instructions on how to use these files.</P> 
+
+<P><A HREF="vector.htm">Next Section</A></P>
+<P><A HREF="vecmat.htm">Back to Index</A></P>
+
+</BODY>
+</HTML>

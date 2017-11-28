@@ -1,0 +1,1 @@
+java media.protocol.gtec.DAQWizard -serial UA-2007.04.01 -device usbAmpA

@@ -1,0 +1,1 @@
+java examples.basic.advanced.VideoColorClassificationTest

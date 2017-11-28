@@ -1,0 +1,72 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"
+  "http://www.w3.org/TR/REC-html40/transitional.dtd">
+<HTML>
+<HEAD>
+  <TITLE>VecMat - FFTW</TITLE>
+  <META HTTP-EQUIV="Content-Type" CONTENT="text/html;charset=iso-8859-1">
+  <META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+  <META NAME="Author" CONTENT="Kevin Dolan">
+  <LINK HREF="vecmat.css" REL="stylesheet" TYPE="text/css">
+</HEAD>
+
+<BODY>
+
+<H1>15. Using this Software with the <EM>FFTW</EM> Libraries.</H1>
+
+<P>The header file "vm_fftw3.h" includes a wrapper class for the 1-dimensional
+Fourier Transform functions of the <EM>FFTW 3.xx</EM> Libraries. This header is
+<STRONG>not</STRONG> compatible with version 2.xx of the <EM>FFTW</EM>
+software. The old header file <A HREF="fftw2xx.htm">"vm_fftw2.h"</A> can
+still be used if you wish, but it will no longer be updated.</P>
+
+<P>The following optional components are provided for using <EM>FFTW</EM> with
+the <EM>VecMat</EM> software.
+
+<UL>
+  <LI>15.1. The <A HREF="fftplan.htm">FFTPlan class</A>. This acts as a
+  wrapper for the 1-dimensional Fourier Transform functions of the
+  <EM>FFTW</EM> software.</LI>
+  <LI>15.2. Five <A HREF="fftw_functions.htm">global support functions</A>
+  which internally use the <EM>FFTW</EM> software to calculate power-spectra,
+  cross-spectra, coherence function, Hilbert transform, and perform frequency
+  domain digital filtering.</LI>
+  <LI>15.3. The <A HREF="fftw_allocator.htm">fftw_allocator class</A>. This
+  is a <EM>STL</EM> style <EM>C++</EM> allocator, which uses the
+  <CODE>fftw_malloc</CODE> and <CODE>fftw_free</CODE> functions. It can be
+  found in "fftw_allocator.h". This header file is not dependant on the
+  <EM>VecMat</EM> software, and can be used independently of it.</LI>
+</UL>
+
+<P>To enable the <EM>FFTW</EM> wrapper and functions in the <EM>VecMat</EM>
+software, include the "vm_fftw3.h" header file. This will enable the
+<CODE>FFTPlan</CODE> class, and supporting functions. The <EM>VecMat</EM>
+software will still use the standard allocator for memory allocation.</P>
+
+<P>If you want to use the provided <CODE>fftw_allocator</CODE> class, uncomment
+the line <CODE>#include "vm/fftw_allocator.h"</CODE> in the "vm_basic.h" header
+file. This will cause the <EM>VecMat</EM> software to use the
+<CODE>fftw_allocator</CODE> class for memory allocation.</P>
+
+<P>Alternatively, you can include the header file "fftw_allocator"
+<EM>before</EM> the "vec_mat.h" or "vm_basic.h" header file. This will have the
+same effect as the above. This is somewhat dangerous, though. If you forget to
+include the "fftw_allocator" header file in one or more of your source files
+which include "vec_mat.h" or "vm_basic.h", then you could end up allocating
+memory with one allocator, and deallocating it with another, which is very bad.
+In particular, if you want to use the <CODE>fftw_allocator</CODE> class along
+with <EM>Numerical Recipes in C++</EM>, then you should use option 2. Each
+<EM>NR</EM> source file will include "NR.h", which includes "vm_basic.h". To
+properly use option 3 you would have to alter all of those source files to
+include "fftw_allocator.h" first.</P>  
+
+<P>Note that this software only provides access to a small subset of the
+functionality of the <EM>FFTW</EM> software. I hope to add more functionality
+in the future. For specific information on how the <EM>FFTW</EM> software
+works, see the online documentation on their website: <A
+HREF="http://www.fftw.org/">http://www.fftw.org</A>.</P>
+
+<P><A HREF="bl_tools.htm">Next Section</A></P>
+<P><A HREF="vecmat.htm">Back to Index</A></P>
+
+</BODY>
+</HTML>

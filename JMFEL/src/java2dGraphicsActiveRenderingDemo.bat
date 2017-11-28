@@ -1,0 +1,1 @@
+java -server -XX:NewSize=128m -XX:MaxNewSize=128m -XX:SurvivorRatio=8 -Xms512m -Xmx512m examples.funapplication.ActiveRenderingFunApplication

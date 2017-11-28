@@ -1,0 +1,25 @@
+Microsoft Visual Studio Solution File, Format Version 8.00
+Project("{EAF909A5-FA59-4C3D-9431-0FCC20D5BCF9}") = "SignalProcessor", "SignalProcessor.icproj", "{83974724-0EE4-4645-8C71-A4520338FAED}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfiguration) = preSolution
+		Debug = Debug
+		Release = Release
+	EndGlobalSection
+	GlobalSection(ProjectConfiguration) = postSolution
+		{83974724-0EE4-4645-8C71-A4520338FAED}.Debug.ActiveCfg = Debug|Win32
+		{83974724-0EE4-4645-8C71-A4520338FAED}.Debug.Build.0 = Debug|Win32
+		{83974724-0EE4-4645-8C71-A4520338FAED}.Release.ActiveCfg = Release|Win32
+		{83974724-0EE4-4645-8C71-A4520338FAED}.Release.Build.0 = Release|Win32
+		{EAF9D38A-13C0-4FF2-88C6-61C32274B0E9}.Release.Build.0 = Release|Win32
+		{EAF9D38A-13C0-4FF2-88C6-61C32274B0E9}.Release.ActiveCfg = Release|Win32
+		{EAF9D38A-13C0-4FF2-88C6-61C32274B0E9}.Debug.Build.0 = Debug|Win32
+		{EAF9D38A-13C0-4FF2-88C6-61C32274B0E9}.Debug.ActiveCfg = Debug|Win32
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+	EndGlobalSection
+	GlobalSection(ExtensibilityAddIns) = postSolution
+	EndGlobalSection
+EndGlobal

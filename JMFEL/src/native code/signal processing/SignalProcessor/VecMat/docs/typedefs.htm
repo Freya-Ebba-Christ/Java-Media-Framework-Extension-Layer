@@ -1,0 +1,102 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"
+  "http://www.w3.org/TR/REC-html40/transitional.dtd">
+<HTML>
+<HEAD>
+  <TITLE>VecMat - Typedefs</TITLE>
+  <META HTTP-EQUIV="Content-Type" CONTENT="text/html;charset=iso-8859-1">
+  <META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+  <META NAME="Author" CONTENT="Kevin Dolan">
+  <LINK HREF="vecmat.css" REL="stylesheet" TYPE="text/css">
+</HEAD>
+
+<BODY>
+
+<H1>11. Typedefs.</H1>
+
+<P>Several <CODE>typedef</CODE> declarations are included for convenience
+purposes. All of these typedefs are provided in the global namespace. These are
+also designed to be compatible with those used by <EM>Numerical Recipes in
+C++</EM>.</P>
+
+<H2>11.1. File Offset Type.</H2>
+<P>In order to maintain compatibility with large files on systems using 32bit
+pointers, an offset type is provided. It will be a typedef of one of the
+following <EM>C</EM> standard types:</P>
+
+<DIV CLASS=clb>
+<P>typedef off_t offset_type</P>
+<P>typedef off64_t offset_type</P>
+</DIV>
+
+<P>On most platforms it will simply be a typedef for <CODE>off_t</CODE>. The
+user should then make sure that large file support is enabled for his compilor,
+so that <CODE>off_t</CODE> represents a 64bit integer type. For the
+<EM>MinGW32</EM> compilor it is a typedef for <CODE>off64_t</CODE>. Under
+<EM>Cygwin</EM> it is a typedef for <CODE>off_t</CODE>, which should be 64bit
+automatically. I am not sure about other <EM>Win32</EM> compilors. For all
+other platforms it is a typedef for <CODE>off_t</CODE>, so you may need to set
+a flag to enable transparent large file support. For example, using <EM>gcc</EM>
+under <EM>Linux</EM> you would need to use <CODE>-D_FILE_OFFSET_BITS=64</CODE>,
+and <CODE>-D_LARGEFILE_SOURCE</CODE>.</P>
+
+<P>Note that <CODE>fstreams</CODE> still will not work for large files on
+platforms with 32bit pointers. This type is provided for use with the
+<CODE>file_status&lt;T&gt;()</CODE> function, and the <CODE>File</CODE>
+class provided by this software. The <CODE>read()</CODE> and
+<CODE>write()</CODE> vector and matrix member functions, as well as the global
+<CODE>read_binary()</CODE>, <CODE>write_binary()</CODE>,
+<CODE>read_text()</CODE>, and <CODE>write_text()</CODE> functions, all use
+<CODE>fstreams</CODE>, so large files will not work for them on 32bit
+platforms.</P>
+
+<H2>11.2. Complex Types.</H2>
+
+<DIV CLASS=clb>
+<P>typedef std::complex&lt;float&gt; CPLX_SP</P>
+<P>typedef std::complex&lt;double&gt; CPLX_DP</P>
+</DIV>
+
+<H2>11.3. Vector Types.</H2>
+
+<DIV CLASS=clb>
+<P>typedef Vector&lt;bool&gt; Vec_BOOL</P>
+<P>typedef Vector&lt;char&gt; Vec_CHR</P>
+<P>typedef Vector&lt;signed char&gt; Vec_SCHR</P>
+<P>typedef Vector&lt;unsigned char&gt; Vec_UCHR</P>
+<P>typedef Vector&lt;short&gt; Vec_SHRT</P>
+<P>typedef Vector&lt;unsigned short&gt; Vec_USHRT</P>
+<P>typedef Vector&lt;int&gt; Vec_INT</P>
+<P>typedef Vector&lt;unsigned int&gt; Vec_UINT</P>
+<P>typedef Vector&lt;long&gt; Vec_LNG</P>
+<P>typedef Vector&lt;unsigned long&gt; Vec_ULNG</P>
+<P>typedef Vector&lt;float&gt; Vec_SP</P>
+<P>typedef Vector&lt;double&gt; Vec_DP</P>
+<P>typedef Vector&lt;CPLX_SP&gt; Vec_CPLX_SP</P>
+<P>typedef Vector&lt;CPLX_DP&gt; Vec_CPLX_DP</P>
+</DIV>
+
+<H2>11.4. Matrix Types.</H2>
+
+<DIV CLASS=clb>
+<P>typedef Matrix&lt;bool&gt; Mat_BOOL</P>
+<P>typedef Matrix&lt;char&gt; Mat_CHR</P>
+<P>typedef Matrix&lt;signed char&gt; Mat_SCHR</P>
+<P>typedef Matrix&lt;unsigned char&gt; Mat_UCHR</P>
+<P>typedef Matrix&lt;short&gt; Mat_SHRT</P>
+<P>typedef Matrix&lt;unsigned short&gt; Mat_USHRT</P>
+<P>typedef Matrix&lt;int&gt; Mat_INT</P>
+<P>typedef Matrix&lt;unsigned int&gt; Mat_UINT</P>
+<P>typedef Matrix&lt;long&gt; Mat_LNG</P>
+<P>typedef Matrix&lt;unsigned long&gt; Mat_ULNG</P>
+<P>typedef Matrix&lt;float&gt; Mat_SP</P>
+<P>typedef Matrix&lt;double&gt; Mat_DP</P>
+<P>typedef Matrix&lt;CPLX_SP&gt; Mat_CPLX_SP</P>
+<P>typedef Matrix&lt;CPLX_DP&gt; Mat_CPLX_DP</P>
+</DIV>
+
+
+<P><A HREF="error_checking.htm">Next Section</A></P>
+<P><A HREF="VecMat.htm">Back to Index</A></P>
+
+</BODY>
+</HTML>

@@ -1,0 +1,76 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"
+  "http://www.w3.org/TR/REC-html40/transitional.dtd">
+<HTML>
+<HEAD>
+  <TITLE>VecMat - FFTW Functions</TITLE>
+  <META HTTP-EQUIV="Content-Type" CONTENT="text/html;charset=iso-8859-1">
+  <META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+  <META NAME="Author" CONTENT="Kevin Dolan">
+  <LINK HREF="vecmat.css" REL="stylesheet" TYPE="text/css">
+</HEAD>
+
+<BODY>
+
+<H2>15.2. Global Support Functions for the FFTWPlan Class.</H2>
+
+<P>The following five support functions create and destroy their own
+<CODE>FFTPlan</CODE> objects, allowing them to be called without having to
+first create working vectors for the plan. If you need to perform these
+operations many times, on vectors of the same size, then it is better to
+construct a <CODE>FFTPlan</CODE> object, and use the corresponding member
+functions instead.</P>
+
+<H4><CODE>void power(const Vec_DP&amp; signal, Vec_DP&amp; pwr)</CODE></H4>
+<P>This function works exactly like the <CODE>FFTPlan::power()</CODE> member
+function, except that it constructs its own plan, and workspace, and then
+destroys them when it is through.</P>
+
+<H4><CODE>void cross_spectrum(const Vec_DP&amp; signal1, const Vec_DP&amp;
+signal2, Vec_CPLX_DP&amp; cross)</CODE></H4>
+<P>This function works exactly like the <CODE>FFTPlan::cross_spectrum()</CODE>
+member function, except that it constructs its own plan, and workspace, and
+then destroys them when it is through.</P>
+
+<H4><CODE>void spectra(const Vec_DP&amp; signal1, const Vec_DP&amp;
+signal2, Vec_DP&amp; pow1, Vec_DP&amp; pow2, Vec_CPLX_DP&amp; cross)</CODE></H4>
+<P>This function works exactly like the <CODE>FFTPlan::spectra()</CODE>
+member function, except that it constructs its own plan, and workspace, and
+then destroys them when it is through.</P>
+
+<H4><CODE>void coherence(const Vec_DP&amp; signal1, const Vec_DP&amp; signal2,
+Vec_DP&amp; coh)</CODE></H4>
+<P>This function works exactly like the <CODE>FFTPlan::coherence()</CODE>
+member function, except that it constructs its own plan, and workspace, and
+then destroys them when it is through.</P>
+
+<H4><CODE>void filter(const Vec_DP&amp; signal, Vec_DP&amp; sigflt, const
+Filter&amp; filt, size_t pad = 0)</CODE></H4>
+<P>This function works exactly like the <CODE>FFTPlan::filter()</CODE> member
+function, except that it constructs its own plan, and workspace, and then
+destroys them when it is through. The optional parameter <CODE>pad</CODE>
+determines how much zero padding should be used. Use the default value of zero
+if the input signal is periodic.</P>
+
+<H4><CODE>void hilbert(const Vec_DP&amp; signal, Vec_CPLX_DP&amp;
+hilb, size_t pad = 0)</CODE></H4>
+<P>This function works exactly like the <CODE>FFTPlan::hilbert()</CODE>
+member function, except that it constructs its own plan, and workspace, and
+then destroys them when it is through. The optional parameter <CODE>pad</CODE>
+determines how much zero padding should be used. If the input signal length has
+large prime factors, you may want to use the <CODE>good_size()</CODE> function
+to find a padded length.</P>
+
+<H4><CODE>size_t good_size(size_t len, size_t factor = 1)</CODE></H4>
+<P>This function finds a number with only small prime factors. It returns a
+value not more than 12.5% larger than <CODE>len</CODE>, with mostly prime
+factors of 2, and at most three prime factors of 3 and 5. The optional
+parameter <CODE>factor</CODE> can be used to make sure the returned value is
+divisible by a certain number. If <CODE>len</CODE> is less than <CODE>128 *
+factor</CODE>, then the function will simply return the smallest number greater
+than or equal to <CODE>len</CODE> which is divisible by
+<CODE>factor</CODE>.</P>
+
+<P><A HREF="fftw3xx.htm">Back to FFTW</A></P>
+
+</BODY>
+</HTML>

@@ -1,0 +1,463 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"
+  "http://www.w3.org/TR/REC-html40/transitional.dtd">
+<HTML>
+<HEAD>
+  <TITLE>VecMat - Global Math Functions and Operators</TITLE>
+  <META HTTP-EQUIV="Content-Type" CONTENT="text/html;charset=iso-8859-1">
+  <META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+  <META NAME="Author" CONTENT="Kevin Dolan">
+  <LINK HREF="vecmat.css" REL="stylesheet" TYPE="text/css">
+</HEAD>
+
+<BODY>
+
+<H1>6. Global Math Functions and Operators.</H1>
+
+<P>The <EM>VecMat</EM> software provides a variety of functions and operators
+for math operations. Include "vec_mat.h" rather than "vm_basic.h" if you want to
+make use of these functions and operators.</P>
+
+<P>Two inline template functions are provided for normal types, rather than for
+Vectors and Matrices. These are used by other components of the <EM>VecMat</EM>
+software, and may be useful on their own.</P>
+
+<DIV CLASS=clb>
+<P>inline T square(const T&amp; x)</P>
+<P>inline T abs(const T&amp; x)</P>
+</DIV>
+
+<P>The <CODE>square()</CODE> function just returns the square of the argument.
+The <CODE>abs</CODE> function provides an <CODE>inline</CODE> version of the
+<CODE>abs()</CODE> function which works for all standard types, thus
+eliminating the need to mess around with standard math library functions like
+<CODE>int abs(int)</CODE> and <CODE>float fabs(float)</CODE>. Two template
+specializations are provided for the <CODE>std::complex&lt;float&gt;</CODE> and
+<CODE>std::complex&lt;double&gt;</CODE> types. These versions simply call the
+<CODE>std::abs()</CODE> function defined in the &lt;complex&gt; standard header
+file.</P>
+
+<DIV CLASS=clb>
+<P>inline float abs(const std::complex&lt;float&gt;&amp; x)</P> 
+<P>inline double abs(const std::complex&lt;double&gt;&amp; x)</P> 
+</DIV>
+
+<P>This allows the overloaded <CODE>abs()</CODE> functions for vectors and
+matrices, provided below to use the same code for all standard types as well
+as for <CODE>std::complex&lt;float&gt;</CODE> and
+<CODE>std::complex&lt;double&gt;</CODE>. Note that since these functions are in
+the <CODE>VM::</CODE> namespace, there should not be any conflicts between them
+and the standard versions. However, when using a
+<CODE>using namespace VM;</CODE> directive in your source files, ambiguities may
+occur. Remember that you can always specify which version you want by using the
+full name, for example <CODE>VM::abs()</CODE>, for this version,
+<CODE>std::abs()</CODE> for the versions provided in the &lt;cmath&gt; and
+&lt;complex&gt; header files, and <CODE>::abs()</CODE> for any version in the
+default namespace.</P>
+
+<H2>6.1. Overloaded Math Functions for Vectors.</H2> 
+
+<P>These functions mimic the Standard Library functions of the same name,
+performing the associated operation on every element of the vector.</P>
+
+<DIV CLASS=clb>
+<P>Vector&lt;T&gt abs(const Vector&lt;T&gt;&amp x)</P>
+<P>Vector&lt;T&gt; abs(const Vector&lt;complex&lt;T&gt; &gt;&amp; x)</P>
+<P>Vector&lt;T&gt; acos(const Vector&lt;T&gt;&amp; x)</P>
+<P>Vector&lt;T&gt; asin(const Vector&lt;T&gt;&amp; x)</P>
+<P>Vector&lt;T&gt; atan(const Vector&lt;T&gt;&amp; x)</P>
+<P>Vector&lt;T&gt; atan2(const Vector&lt;T&gt;&amp; x, const
+Vector&lt;T&gt;&amp; y)</P>
+<P>Vector&lt;T&gt; atan2(const Vector&lt;T&gt;&amp; x, const T&amp; y)</P>
+<P>Vector&lt;T&gt; atan2(const T&amp; x, const Vector&lt;T&gt;&amp; y)</P>
+<P>Vector&ltT&gt; cos(const Vector&lt;T&gt;&amp; x)</P>
+<P>Vector&lt;T&gt; cosh(const Vector&lt;T&gt;&amp; x)</P>
+<P>Vector&lt;T&gt; exp(const Vector&lt;T&gt;&amp; x)</P>
+<P>Vector&lt;T&gt; log(const Vector&lt;T&gt;&amp; x)</P>
+<P>Vector&lt;T&gt; log10(const Vector&lt;T&gt;&amp; x)</P>
+<P>Vector&lt;T&gt; pow(const Vector&lt;T&gt;&amp; x, const Vector&lt;T&gt;&amp;
+y)</P>
+<P>Vector&lt;T&gt; pow(const Vector&lt;T&gt;&amp; x, const T&amp; y)</P>
+<P>Vector&lt;T&gt; pow(const T&amp; x, const Vector&lt;T&gt;&amp; y)</P>
+<P>Vector&lt;T&gt; sin(const Vector&lt;T&gt;&amp; x)</P>
+<P>Vector&lt;T&gt; sinh(const Vector&lt;T&gt;&amp; x)</P>
+<P>Vector&lt;T&gt; sqrt(const Vector&lt;T&gt;&amp; x)</P>
+<P>Vector&lt;T&gt; tan(const Vector&lt;T&gt;&amp; x)</P>
+<P>Vector&lt;T&gt; tanh(const Vector&lt;T&gt;&amp; x)</P>
+<P>Vector&lt;T&gt; arg(const Vector&lt;complex&lt;T&gt; &gt;&amp; x)</P>
+<P>Vector&lt;T&gt; norm(const Vector&lt;complex&lt;T&gt; &gt;&amp; x)</P>
+<P>Vector&lt;complex&lt;T&gt; &gt; polar(const Vector&lt;T&gt;&amp; rho, const
+Vector&lt;T&gt;&amp; theta)</P>
+<P>Vector&lt;complex&lt;T&gt; &gt; polar(const Vector&lt;T&gt;&amp; rho, const
+T&amp; theta)</P>
+<P>Vector&lt;complex&lt;T&gt; &gt; polar(const T&amp; rho, const
+Vector&lt;T&gt;&amp; theta)</P>
+<P>Vector&lt;complex&lt;T&gt; &gt; conj(const Vector&lt;complex&lt;T&gt;
+&gt;&amp; x)</P>
+<P>Vector&lt;T&gt; real(const Vector&lt;complex&lt;T&gt; &gt;&amp; x)</P>
+<P>Vector&lt;T&gt; imag(const Vector&lt;complex&lt;T&gt; &gt;&amp; x)</P>
+</DIV>
+
+<P>Note that the <CODE>real()</CODE> and <CODE>imag()</CODE> functions only
+work for complex types with a specialization of the
+<CODE>Traits&lt;T&gt;</CODE> structure. Similarly, the complex version of
+the <CODE>abs()</CODE> function only works for these types. Attempting to use
+these functions for other types will probably result in compiler errors.</P>
+
+<H2>6.2. Global Math Operators for Vectors.</H2>
+
+<H3>6.2.1. Binary Operators for Two Vectors.</H3>
+
+<P>These operators perform the associated operation element by element. The two
+vectors must have the same size. The result is a new vector with the
+appropriate values.</P>
+
+<DIV CLASS=clb>
+<P>Vector&lt;T&gt; operator+(const Vector&lt;T&gt;&amp; lhs, const
+Vector&lt;T&gt;&amp; rhs)</P>
+<P>Vector&lt;T&gt; operator-(const Vector&lt;T&gt;&amp; lhs, const
+Vector&lt;T&gt;&amp; rhs)</P>
+<P>Vector&lt;T&gt; operator*(const Vector&lt;T&gt;&amp; lhs, const
+Vector&lt;T&gt;&amp; rhs)</P>
+<P>Vector&lt;T&gt; operator/(const Vector&lt;T&gt;&amp; lhs, const
+Vector&lt;T&gt;&amp; rhs)</P>
+<P>Vector&lt;T&gt; operator%(const Vector&lt;T&gt;&amp; lhs, const
+Vector&lt;T&gt;&amp; rhs)</P>
+<P>Vector&lt;T&gt; operator&amp;(const Vector&lt;T&gt;&amp; lhs, const
+Vector&lt;T&gt;&amp; rhs)</P>
+<P>Vector&lt;T&gt; operator^(const Vector&lt;T&gt;&amp; lhs, const
+Vector&lt;T&gt;&amp; rhs)</P>
+<P>Vector&lt;T&gt; operator|(const Vector&lt;T&gt;&amp; lhs, const
+Vector&lt;T&gt;&amp; rhs)</P>
+<P>Vector&lt;T&gt; operator&lt;&lt;(const Vector&lt;T&gt;&amp; lhs, const
+Vector&lt;T&gt;&amp; rhs)</P>
+<P>Vector&lt;T&gt; operator&gt;&gt;(const Vector&lt;T&gt;&amp; lhs, const
+Vector&lt;T&gt;&amp; rhs)</P>
+<P>Vector&lt;bool&gt; operator==(const Vector&lt;T&gt;&amp; lhs, const
+Vector&lt;T&gt;&amp; rhs)</P>
+<P>Vector&lt;bool&gt; operator!=(const Vector&lt;T&gt;&amp; lhs, const
+Vector&lt;T&gt;&amp; rhs)</P>
+<P>Vector&lt;bool&gt; operator&lt;(const Vector&lt;T&gt;&amp; lhs, const
+Vector&lt;T&gt;&amp; rhs)</P>
+<P>Vector&lt;bool&gt; operator&gt;(const Vector&lt;T&gt;&amp; lhs, const
+Vector&lt;T&gt;&amp; rhs)</P>
+<P>Vector&lt;bool&gt; operator&lt;=(const Vector&lt;T&gt;&amp; lhs, const
+Vector&lt;T&gt;&amp; rhs)</P>
+<P>Vector&lt;bool&gt; operator&gt;=(const Vector&lt;T&gt;&amp; lhs, const
+Vector&lt;T&gt;&amp; rhs)</P>
+<P>Vector&lt;bool&gt; operator&amp;&amp;(const Vector&lt;T&gt;&amp; lhs, const
+Vector&lt;T&gt;&amp; rhs)</P>
+<P>Vector&lt;bool&gt; operator||(const Vector&lt;T&gt;&amp; lhs, const
+Vector&lt;T&gt;&amp; rhs)</P>
+</DIV>
+
+<H3>6.2.2. Binary Operators for Vectors and Scalars.</H3>
+
+<P>These operators perform the associated operation element-by-element with a
+scalar. The result is a new vector with the appropriate values.</P>
+
+<DIV CLASS=clb>
+<P>Vector&lt;T&gt; operator+(const Vector&lt;T&gt;&amp; lhs, const T&amp;
+a)</P>
+<P>Vector&lt;T&gt; operator+(const T&amp; a, const Vector&lt;T&gt;&amp;
+rhs)</P>
+<P>Vector&lt;T&gt; operator-(const Vector&lt;T&gt;&amp; lhs, const T&amp;
+a)</P>
+<P>Vector&lt;T&gt; operator-(const T&amp; a, const Vector&lt;T&gt;&amp;
+rhs)</P>
+<P>Vector&lt;T&gt; operator*(const Vector&lt;T&gt;&amp; lhs, const T&amp;
+a)</P>
+<P>Vector&lt;T&gt; operator*(const T&amp; a, const Vector&lt;T&gt;&amp;
+rhs)</P>
+<P>Vector&lt;T&gt; operator/(const Vector&lt;T&gt;&amp; lhs, const T&amp;
+a)</P>
+<P>Vector&lt;T&gt; operator/(const T&amp; a, const Vector&lt;T&gt;&amp;
+rhs)</P>
+<P>Vector&lt;T&gt; operator%(const Vector&lt;T&gt;&amp; lhs, const T&amp;
+a)</P>
+<P>Vector&lt;T&gt; operator%(const T&amp; a, const Vector&lt;T&gt;&amp;
+rhs)</P>
+<P>Vector&lt;T&gt; operator&amp;(const Vector&lt;T&gt;&amp; lhs, const T&amp;
+a)</P>
+<P>Vector&lt;T&gt; operator&amp;(const T&amp; a, const Vector&lt;T&gt;&amp;
+rhs)</P>
+<P>Vector&lt;T&gt; operator^(const Vector&lt;T&gt;&amp; lhs, const T&amp;
+a)</P>
+<P>Vector&lt;T&gt; operator^(const T&amp; a, const Vector&lt;T&gt;&amp;
+rhs)</P>
+<P>Vector&lt;T&gt; operator|(const Vector&lt;T&gt;&amp; lhs, const T&amp;
+a)</P>
+<P>Vector&lt;T&gt; operator|(const T&amp; a, const Vector&lt;T&gt;&amp;
+rhs)</P>
+<P>Vector&lt;T&gt; operator&lt;&lt;(const Vector&lt;T&gt;&amp; lhs, const
+T&amp; a)</P>
+<P>Vector&lt;T&gt; operator&lt;&lt;(const T&amp; a, const Vector&lt;T&gt;&amp;
+rhs)</P>
+<P>Vector&lt;T&gt; operator&gt;&gt;(const Vector&lt;T&gt;&amp; lhs, const
+T&amp; a)</P>
+<P>Vector&lt;T&gt; operator&gt;&gt;(const T&amp; a, const Vector&lt;T&gt;&amp;
+rhs)</P>
+<P>Vector&lt;bool&gt; operator==(const Vector&lt;T&gt;&amp; lhs, const T&amp;
+a)</P>
+<P>Vector&lt;bool&gt; operator==(const T&amp; a, const Vector&lt;T&gt;&amp;
+rhs)</P>
+<P>Vector&lt;bool&gt; operator!=(const Vector&lt;T&gt;&amp; lhs, const T&amp;
+a)</P>
+<P>Vector&lt;bool&gt; operator!=(const T&amp; a, const Vector&lt;T&gt;&amp;
+rhs)</P>
+<P>Vector&lt;bool&gt; operator&lt;(const Vector&lt;T&gt;&amp; lhs, const T&amp;
+a)</P>
+<P>Vector&lt;bool&gt; operator&lt;(const T&amp; a, const Vector&lt;T&gt;&amp;
+rhs)</P>
+<P>Vector&lt;bool&gt; operator&gt;(const Vector&lt;T&gt;&amp; lhs, const T&amp;
+a)</P>
+<P>Vector&lt;bool&gt; operator&gt;(const T&amp; a, const Vector&lt;T&gt;&amp;
+rhs)</P>
+<P>Vector&lt;bool&gt; operator&lt;=(const Vector&lt;T&gt;&amp; lhs, const
+T&amp; a)</P>
+<P>Vector&lt;bool&gt; operator&lt;=(const T&amp; a, const Vector&lt;T&gt;&amp;
+rhs)</P>
+<P>Vector&lt;bool&gt; operator&gt;=(const Vector&lt;T&gt;&amp; lhs, const
+T&amp; a)</P>
+<P>Vector&lt;bool&gt; operator&gt;=(const T&amp; a, const Vector&lt;T&gt;&amp;
+rhs)</P>
+<P>Vector&lt;bool&gt; operator&amp;&amp;(const Vector&lt;T&gt;&amp; lhs, const
+T&amp; a)</P>
+<P>Vector&lt;bool&gt; operator&amp;&amp;(const T&amp; a, const
+Vector&lt;T&gt;&amp; rhs)</P>
+<P>Vector&lt;bool&gt; operator||(const Vector&lt;T&gt;&amp; lhs, const T&amp;
+a)</P>
+<P>Vector&lt;bool&gt; operator||(const T&amp; a, const Vector&lt;T&gt;&amp;
+rhs)</P>
+</DIV>
+
+
+<H2>6.3. Overloaded Math Functions for Matrices.</H2>
+
+<P>These functions mimic the Standard Library functions of the same name,
+performing the associated operation on every element of the matrix.</P>
+
+<DIV CLASS=clb>
+<P>Matrix&lt;T&gt; abs(const Matrix&lt;T&gt;&amp; x)</P>
+<P>Matrix&lt;T&gt; abs(const Matrix&lt;complex&lt;T&gt; &gt;&amp; x)</P>
+<P>Matrix&lt;T&gt; acos(const Matrix&lt;T&gt;&amp; x)</P>
+<P>Matrix&lt;T&gt; asin(const Matrix&lt;T&gt;&amp; x)</P>
+<P>Matrix&lt;T&gt; atan(const Matrix&lt;T&gt;&amp; x)</P>
+<P>Matrix&lt;T&gt; atan2(const Matrix&lt;T&gt;&amp; x, const
+Matrix&lt;T&gt;&amp; y)</P>
+<P>Matrix&lt;T&gt; atan2(const Matrix&lt;T&gt;&amp; x, const T&amp; y)</P>
+<P>Matrix&lt;T&gt; atan2(const T&amp; x, const Matrix&lt;T&gt;&amp; y)</P>
+<P>Matrix&lt;T&gt; cos(const Matrix&lt;T&gt;&amp; x)</P>
+<P>Matrix&lt;T&gt; cosh(const Matrix&lt;T&gt;&amp; x)</P>
+<P>Matrix&lt;T&gt; exp(const Matrix&lt;T&gt;&amp; x)</P>
+<P>Matrix&lt;T&gt; log(const Matrix&lt;T&gt;&amp; x)</P>
+<P>Matrix&lt;T&gt; log10(const Matrix&lt;T&gt;&amp; x)</P>
+<P>Matrix&lt;T&gt; pow(const Matrix&lt;T&gt;&amp; x, const Matrix&lt;T&gt;&amp;
+y)</P>
+<P>Matrix&lt;T&gt; pow(const Matrix&lt;T&gt;&amp; x, const T&amp; y)</P>
+<P>Matrix&lt;T&gt; pow(const T&amp; x, const Matrix&lt;T&gt;&amp; y)</P>
+<P>Matrix&lt;T&gt; sin(const Matrix&lt;T&gt;&amp; x)</P>
+<P>Matrix&lt;T&gt; sinh(const Matrix&lt;T&gt;&amp; x)</P>
+<P>Matrix&lt;T&gt; sqrt(const Matrix&lt;T&gt;&amp; x)</P>
+<P>Matrix&lt;T&gt; tan(const Matrix&lt;T&gt;&amp; x)</P>
+<P>Matrix&lt;T&gt; tanh(const Matrix&lt;T&gt;&amp; x)</P>
+<P>Matrix&lt;T&gt; arg(const Matrix&lt;complex&lt;T&gt; &gt;&amp; x)</P>
+<P>Matrix&lt;T&gt; norm(const Matrix&lt;complex&lt;T&gt; &gt;&amp; x)</P>
+<P>Matrix&lt;complex&lt;T&gt; &gt; polar(const Matrix&lt;T&gt;&amp; rho, const
+Matrix&lt;T&gt;&amp; theta)</P>
+<P>Matrix&lt;complex&lt;T&gt; &gt; polar(const Matrix&lt;T&gt;&amp; rho, const
+T&amp; theta)</P>
+<P>Matrix&lt;complex&lt;T&gt; &gt; polar(const T&amp; rho, const
+Matrix&lt;T&gt;&amp; theta)</P>
+<P>Matrix&lt;complex&lt;T&gt; &gt; conj(const Matrix&lt;complex&lt;T&gt;
+&gt;&amp; x)</P>
+<P>Matrix&lt;T&gt; real(const Matrix&lt;complex&lt;T&gt; &gt;&amp; x)</P>
+<P>Matrix&lt;T&gt; imag(const Matrix&lt;complex&lt;T&gt; &gt;&amp; x)</P>
+</DIV>
+
+<P>Note that the <CODE>real()</CODE> and <CODE>imag()</CODE> functions only
+work for complex types with a specialization of the
+<CODE>VMTraits&lt;T&gt;</CODE> structure. Similarly, the complex version of the
+<CODE>abs()</CODE> function only works for these types. Attempting to use these
+functions for other types will probably result in compiler errors.</P>
+
+<H2>6.4. Global Math Operators for Matrices.</H2>
+
+<H3>6.4.1. Binary Operators for Two Matrices.</H3>
+
+<P>These operators perform the associated operation element by element. The two
+matrices must have the same size. The result is a new matrix with the
+appropriate values.</P>
+
+<DIV CLASS=clb>
+<P>Matrix&lt;T&gt; operator+(const Matrix&lt;T&gt;&amp; lhs, const
+Matrix&lt;T&gt;&amp; rhs)</P>
+<P>Matrix&lt;T&gt; operator-(const Matrix&lt;T&gt;&amp; lhs, const
+Matrix&lt;T&gt;&amp; rhs)</P>
+<P>Matrix&lt;T&gt; operator*(const Matrix&lt;T&gt;&amp; lhs, const
+Matrix&lt;T&gt;&amp; rhs)</P>
+<P>Matrix&lt;T&gt; operator/(const Matrix&lt;T&gt;&amp; lhs, const
+Matrix&lt;T&gt;&amp; rhs)</P>
+<P>Matrix&lt;T&gt; operator%(const Matrix&lt;T&gt;&amp; lhs, const
+Matrix&lt;T&gt;&amp; rhs)</P>
+<P>Matrix&lt;T&gt; operator&amp;(const Matrix&lt;T&gt;&amp; lhs, const
+Matrix&lt;T&gt;&amp; rhs)</P>
+<P>Matrix&lt;T&gt; operator^(const Matrix&lt;T&gt;&amp; lhs, const
+Matrix&lt;T&gt;&amp; rhs)</P>
+<P>Matrix&lt;T&gt; operator|(const Matrix&lt;T&gt;&amp; lhs, const
+Matrix&lt;T&gt;&amp; rhs)</P>
+<P>Matrix&lt;T&gt; operator&lt;&lt;(const Matrix&lt;T&gt;&amp; lhs, const
+Matrix&lt;T&gt;&amp; rhs)</P>
+<P>Matrix&lt;T&gt; operator&gt;&gt;(const Matrix&lt;T&gt;&amp; lhs, const
+Matrix&lt;T&gt;&amp; rhs)</P>
+<P>Matrix&lt;bool&gt; operator==(const Matrix&lt;T&gt;&amp; lhs, const
+Matrix&lt;T&gt;&amp; rhs)</P>
+<P>Matrix&lt;bool&gt; operator!=(const Matrix&lt;T&gt;&amp; lhs, const
+Matrix&lt;T&gt;&amp; rhs)</P>
+<P>Matrix&lt;bool&gt; operator&lt;(const Matrix&lt;T&gt;&amp; lhs, const
+Matrix&lt;T&gt;&amp; rhs)</P>
+<P>Matrix&lt;bool&gt; operator&gt;(const Matrix&lt;T&gt;&amp; lhs, const
+Matrix&lt;T&gt;&amp; rhs)</P>
+<P>Matrix&lt;bool&gt; operator&lt;=(const Matrix&lt;T&gt;&amp; lhs, const
+Matrix&lt;T&gt;&amp; rhs)</P>
+<P>Matrix&lt;bool&gt; operator&gt;=(const Matrix&lt;T&gt;&amp; lhs, const
+Matrix&lt;T&gt;&amp; rhs)</P>
+<P>Matrix&lt;bool&gt; operator&amp;&amp;(const Matrix&lt;T&gt;&amp; lhs, const
+Matrix&lt;T&gt;&amp; rhs)</P>
+<P>Matrix&lt;bool&gt; operator||(const Matrix&lt;T&gt;&amp; lhs, const
+Matrix&lt;T&gt;&amp; rhs)</P>
+</DIV>
+
+<P>These operators perform the associated operation element-by-element. The two
+matrices must have the same dimensions. The result is a new matrix with the
+appropriate values.</P>
+
+<H3>6.4.2. Binary Operators for Matrices and Scalars.</H3>
+
+<P>These operators perform the associated operation element-by-element with a
+scalar. The result is a new matrix with the appropriate values.</P>
+
+<DIV CLASS=clb>
+<P>Matrix&lt;T&gt; operator+(const Matrix&lt;T&gt;&amp; lhs, const T&amp;
+a)</P>
+<P>Matrix&lt;T&gt; operator+(const T&amp; a, const Matrix&lt;T&gt;&amp;
+rhs)</P>
+<P>Matrix&lt;T&gt; operator-(const Matrix&lt;T&gt;&amp; lhs, const T&amp;
+a)</P>
+<P>Matrix&lt;T&gt; operator-(const T&amp; a, const Matrix&lt;T&gt;&amp;
+rhs)</P>
+<P>Matrix&lt;T&gt; operator*(const Matrix&lt;T&gt;&amp; lhs, const T&amp;
+a)</P>
+<P>Matrix&lt;T&gt; operator*(const T&amp; a, const Matrix&lt;T&gt;&amp;
+rhs)</P>
+<P>Matrix&lt;T&gt; operator/(const Matrix&lt;T&gt;&amp; lhs, const T&amp;
+a)</P>
+<P>Matrix&lt;T&gt; operator/(const T&amp; a, const Matrix&lt;T&gt;&amp;
+rhs)</P>
+<P>Matrix&lt;T&gt; operator%(const Matrix&lt;T&gt;&amp; lhs, const T&amp;
+a)</P>
+<P>Matrix&lt;T&gt; operator%(const T&amp; a, const Matrix&lt;T&gt;&amp;
+rhs)</P>
+<P>Matrix&lt;T&gt; operator&amp;(const Matrix&lt;T&gt;&amp; lhs, const T&amp;
+a)</P>
+<P>Matrix&lt;T&gt; operator&amp;(const T&amp; a, const Matrix&lt;T&gt;&amp;
+rhs)</P>
+<P>Matrix&lt;T&gt; operator^(const Matrix&lt;T&gt;&amp; lhs, const T&amp;
+a)</P>
+<P>Matrix&lt;T&gt; operator^(const T&amp; a, const Matrix&lt;T&gt;&amp;
+rhs)</P>
+<P>Matrix&lt;T&gt; operator|(const Matrix&lt;T&gt;&amp; lhs, const T&amp;
+a)</P>
+<P>Matrix&lt;T&gt; operator|(const T&amp; a, const Matrix&lt;T&gt;&amp;
+rhs)</P>
+<P>Matrix&lt;T&gt; operator&lt;&lt;(const Matrix&lt;T&gt;&amp; lhs, const
+T&amp; a)</P>
+<P>Matrix&lt;T&gt; operator&lt;&lt;(const T&amp; a, const Matrix&lt;T&gt;&amp;
+rhs)</P>
+<P>Matrix&lt;T&gt; operator&gt;&gt;(const Matrix&lt;T&gt;&amp; lhs, const
+T&amp; a)</P>
+<P>Matrix&lt;T&gt; operator&gt;&gt;(const T&amp; a, const Matrix&lt;T&gt;&amp;
+rhs)</P>
+<P>Matrix&lt;bool&gt; operator==(const Matrix&lt;T&gt;&amp; lhs, const T&amp;
+a)</P>
+<P>Matrix&lt;bool&gt; operator==(const T&amp; a, const Matrix&lt;T&gt;&amp;
+rhs)</P>
+<P>Matrix&lt;bool&gt; operator!=(const Matrix&lt;T&gt;&amp; lhs, const T&amp;
+a)</P>
+<P>Matrix&lt;bool&gt; operator!=(const T&amp; a, const Matrix&lt;T&gt;&amp;
+rhs)</P>
+<P>Matrix&lt;bool&gt; operator&lt;(const Matrix&lt;T&gt;&amp; lhs, const T&amp;
+a)</P>
+<P>Matrix&lt;bool&gt; operator&lt;(const T&amp; a, const Matrix&lt;T&gt;&amp;
+rhs)</P>
+<P>Matrix&lt;bool&gt; operator&gt;(const Matrix&lt;T&gt;&amp; lhs, const T&amp;
+a)</P>
+<P>Matrix&lt;bool&gt; operator&gt;(const T&amp; a, const Matrix&lt;T&gt;&amp;
+rhs)</P>
+<P>Matrix&lt;bool&gt; operator&lt;=(const Matrix&lt;T&gt;&amp; lhs, const
+T&amp; a)</P>
+<P>Matrix&lt;bool&gt; operator&lt;=(const T&amp; a, const Matrix&lt;T&gt;&amp;
+rhs)</P>
+<P>Matrix&lt;bool&gt; operator&gt;=(const Matrix&lt;T&gt;&amp; lhs, const
+T&amp; a)</P>
+<P>Matrix&lt;bool&gt; operator&gt;=(const T&amp; a, const Matrix&lt;T&gt;&amp;
+rhs)</P>
+<P>Matrix&lt;bool&gt; operator&amp;&amp;(const Matrix&lt;T&gt;&amp; lhs, const
+T&amp; a)</P>
+<P>Matrix&lt;bool&gt; operator&amp;&amp;(const T&amp; a, const
+Matrix&lt;T&gt;&amp; rhs)</P>
+<P>Matrix&lt;bool&gt; operator||(const Matrix&lt;T&gt;&amp; lhs, const T&amp;
+a)</P>
+<P>Matrix&lt;bool&gt; operator||(const T&amp; a, const Matrix&lt;T&gt;&amp;
+rhs)</P>
+</DIV>
+
+<H2>6.5. Linear Algebra Functions for Vectors and Matrices.</H2>
+
+<P>These functions perform basic matrix multiplication operations for vectors
+and matrices. They are optimized, but certainly not the fastest implementations
+possible.</P>
+
+<H4><CODE>template &lt;class T&gt; T dot_product(const Vector&lt;T&gt;&amp; x,
+const Vector&lt;T&gt;&amp; y, bool conj_flag = false)</CODE></H4>
+<P>This calculates the scalar product of two vectors. Both vectors must be the
+same size. The optional parameter <CODE>conj_flag</CODE> only has meaning for
+complex vectors. If it is <CODE>true</CODE> then the complex conjugate of the
+second vector will be used.</P>
+
+<H4><CODE>template &lt;class T&gt; Matrix&lt;T&gt; direct_product(const
+Vector&lt;T&gt;&amp; x, const Vector&lt;T&gt;&amp; y)</CODE></H4>
+<P>This calculates the direct product of two vectors. The result is an <CODE>n
+X m</CODE> matrix, where <CODE>n</CODE> is the size of <CODE>x</CODE>, and
+<CODE>m</CODE> is the size of <CODE>y</CODE>.</P>
+
+<H4><CODE>template &lt;class T&gt; Vector&lt;T&gt; matrix_multiply(const
+Vector&lt;T&gt;&amp; x, const Matrix&lt;T&gt;&amp; y)</CODE></H4>
+<P>This performs matrix multiplication between a vector and a matrix. The
+vector is treated as a matrix with one row. The result is a vector whose size
+is equal to the number of columns in <CODE>y</CODE>.</P>
+
+<H4><CODE>template &lt;class T&gt; Vector&lt;T&gt; matrix_multiply(const
+Matrix&lt;T&gt;&amp; x, const Vector&lt;T&gt;&amp; y)</CODE></H4>
+<P>This performs matrix multiplication between a matrix and a vector. The
+vector is treated as a matrix with one column. The result is a vector whose
+size is equal to the number of rows in <CODE>x</CODE>.</P>
+
+<H4><CODE>template &lt;class T&gt; Matrix&lt;T&gt; matrix_multiply(const
+Matrix&lt;T&gt;&amp; x, const Matrix&lt;T&gt;&amp; y)</CODE></H4>
+<P>This performs standard matrix multiplication. The result is an <CODE>n X
+m</CODE> matrix, where <CODE>n</CODE> is the number of rows in </CODE>x</CODE>,
+and <CODE>m</CODE> is the number of columns in <CODE>y</CODE>.</P>
+
+<H4><CODE>template &lt;class T&gt; void matmult_trans(const
+Vector&lt;T&gt;&amp; x)</CODE></H4>
+<P>This multiplies the matrix <CODE>x</CODE> by its own transpose. This is much
+more efficient that calling <CODE>matrix_multiply()</CODE> for a matrix and its
+transpose, as it takes advantage of the fact that the result is always a
+symmetric matrix.</P>
+
+
+<P><A HREF="statistics.htm">Next Section</A></P>
+<P><A HREF="vecmat.htm">Back to Index</A></P>
+
+</BODY>
+</HTML>

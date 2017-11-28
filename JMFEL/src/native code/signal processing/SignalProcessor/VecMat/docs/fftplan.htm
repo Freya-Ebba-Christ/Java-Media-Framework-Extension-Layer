@@ -1,0 +1,246 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"
+  "http://www.w3.org/TR/REC-html40/transitional.dtd">
+<HTML>
+<HEAD>
+  <TITLE>VecMat - FFTPlan</TITLE>
+  <META HTTP-EQUIV="Content-Type" CONTENT="text/html;charset=iso-8859-1">
+  <META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+  <META NAME="Author" CONTENT="Kevin Dolan">
+  <LINK HREF="vecmat.css" REL="stylesheet" TYPE="text/css">
+</HEAD>
+
+<BODY>
+
+<H2>15.1 FFTPlan</H2>
+
+<P>This class acts as a wrapper for the 1-dimensional Fourier Transform
+functions provided by the <EM>FFTW 3.xx</EM> software. It also provides member
+functions for calculating power-spectra, cross-spectra, and performing
+frequency domain digital filtering. Note that this class does not have a public
+copy constructor, or a public assignment operator.</P>
+
+<P>An enumeration type <CODE>Plan_Type</CODE> is provided for use with this
+class. It can take on one of four values:</P>
+
+<UL>
+  <LI><CODE>NULL_PLAN</CODE> - No associated <CODE>fftw_plan</CODE>.</LI>
+  <LI><CODE>R2R_PLAN</CODE> - Real-to-real transforms. The forward transform is
+  from real to half-complex, and the inverse transform is from half-complex to
+  real.</LI>
+  <LI><CODE>R2C_PLAN</CODE> - Real-to-complex transforms. The forward transform
+  is from real to half-complex, and the inverse transform is from half-complex
+  to real.</LI>
+  <LI><CODE>C2C_PLAN</CODE> - Complex-to-complex transforms.</LI>
+<UL>
+
+<P>A second enumberation type <CODE>Plan_Dir</CODE> is privided, for
+determining whether the plan is forward only, backward only, or
+bidirectional.</P>
+
+<UL>
+  <LI><CODE>FORWARD</CODE> - The plan can only be used for forward
+  transforms.</LI>
+  <LI><CODE>BACKWARD</CODE> - The plan can only be used for backward
+  transforms.</LI>
+  <LI><CODE>BIDER</CODE> - The plan can be used for both forward and
+  backward transforms.</LI>
+<UL>
+
+<P>Note that when a plan is initialized, it is done so with two vectors. No
+copies of data are made. The plan will operate directly on the data of those
+vectors. If anything happens which causes that data to be deallocated, the plan
+is invalidated, and should be re-initialized for new data.</P>
+
+<H3>11.1.1. Constructors.</H3>
+
+<H4><CODE>FFTPlan()</CODE></H4>
+<P>The default constructor creates a plan of <CODE>Plan_Type NULL_PLAN</CODE>.
+No actual <CODE>fftw_plan</CODE> is constructed. The plan can be initialized
+later with the <CODE>new_plan()</CODE> member function.</P>
+
+<H4><CODE>FFTPlan(const FFTPlan&amp; plan)</CODE></H4>
+<P>The copy constructor creates a new plan, identical to <CODE>plan</CODE>. The
+new plan contains its own copy of the internal <CODE>fftw_plan</CODE>.</P>
+
+<H4><CODE>FFTPlan(Vec_DP&amp; in, Vec_DP&amp; out, Plan_Dir dir =
+BIDER)</CODE></H4>
+<P>This initializes a plan of <CODE>Plan_Type R2R_PLAN</CODE>. The vectors
+<CODE>in</CODE> and <CODE>out</CODE> must have the same (non-zero) size, or a
+runtime error will occur. This is used to perform real-to-real transforms. The
+frequency domain (<CODE>out</CODE>) is stored according to the convention that
+the real part of the positive (and zero) frequencies is stored in the positive
+values (<EM>0 to N / 2</EM>), and the imaginary part of the positive
+frequencies is stored in the negative values (<EM>N / 2 + 1 to N - 1</EM>),
+where <EM>N</EM> is the size of the two vectors.</P>
+
+<H4><CODE>FFTPlan(Vec_DP&amp; dat, Plan_Dir dir = BIDER)</CODE></H4>
+<P>Initializes a <CODE>R2R_PLAN</CODE> plan for doing in-place transforms.</P>
+
+<H4><CODE>FFTPlan(Vec_DP&amp; in, Vec_CPLX_DP&amp; out, Plan_Dir dir =
+BIDER)</CODE></H4>
+<P>This initializes a plan of <CODE>Plan_Type R2C_PLAN</CODE>. The vector
+<CODE>out</CODE> must have size <EM>N / 2 + 1</EM>, where <EM>N</EM> is the
+(non-zero) size of <CODE>in</CODE>, or a runtime error will occur. This is used
+to perform real-to-complex transforms. Only the positive and zero frequencies
+of <CODE>out</CODE> are stored, because the negative frequencies are simply
+their complex conjugates.</P>
+
+<H4><CODE>FFTPlan(Vec_CPLX_DP&amp; in, Vec_CPLX_DP&amp; out, Plan_Dir dir =
+BIDER)</CODE></H4>
+<P>This initializes a plan of <CODE>Plan_Type C2C_PLAN</CODE>. The vectors
+<CODE>in</CODE> and <CODE>out</CODE> must have the same (non-zero) length, or a
+runtime error will occur. This is used to perform complex-to-complex
+transforms.</P>
+
+<H4><CODE>FFTPlan(Vec_CPLX_DP&amp; dat, Plan_Dir dir = BIDER)</CODE></H4>
+<P>Initializes a <CODE>C2C_PLAN</CODE> plan for doing in-place transforms.</P>
+
+<H4><CODE>FFTPlan&amp; operator=(const FFTPlan&amp; rhs)</CODE></H4>
+<P>The assignment operator destroys the current plan, and reinitializes as a
+copy of <CODE>rhs</CODE>.</P>
+
+<H3>11.1.2. Member functions.</H3>
+
+<H4><CODE>void new_plan(Vec_DP&amp; in, Vec_DP&amp; out, Plan_Dir dir =
+BIDER)</CODE></H4>
+<P>This destroys the current <CODE>fftw_plan</CODE>, and reinitializes as a
+plan of <CODE>Plan_Type R2R_PLAN</CODE>. The vectors <CODE>in</CODE> and
+<CODE>out</CODE> must have the same (non-zero) length, or a runtime error will
+occur.</P>
+
+<H4><CODE>void new_plan(Vec_DP&amp; dat, Plan_Dir dir = BIDER)</CODE></H4>
+<P>This destroys the current <CODE>fftw_plan</CODE>, and reinitializes as an
+in-place plan of <CODE>Plan_Type R2R_PLAN</CODE>.</P>
+
+<H4><CODE>void new_plan(Vec_DP&amp; in, Vec_CPLX_DP&amp; out, Plan_Dir dir =
+BIDER)</CODE></H4>
+<P>This destroys the current <CODE>fftw_plan</CODE>, and reinitializes as a
+plan of <CODE>Plan_Type R2C_PLAN</CODE>.  The vector <CODE>out</CODE> must have
+size <EM>N / 2 + 1</EM>, where <EM>N</EM> is the (non-zero) size of
+<CODE>in</CODE>, or a runtime error will occur.</P>
+
+<H4><CODE>void new_plan(Vec_CPLX_DP&amp; in, Vec_CPLX_DP&amp; out, Plan_Dir dir
+= BIDER)</CODE></H4>
+<P>This destroys the current <CODE>fftw_plan</CODE>, and reinitializes as a
+plan of <CODE>Plan_Type C2C_PLAN</CODE>. The vectors <CODE>in</CODE> and
+<CODE>out</CODE> must have the same (non-zero) length, or a runtime error will
+occur.</P>
+
+<H4><CODE>void new_plan(Vec_CPLX_DP&amp; dat, Plan_Dir dir = BIDER)</CODE></H4>
+<P>This destroys the current <CODE>fftw_plan</CODE>, and reinitializes as an
+in-place plan of <CODE>Plan_Type C2C_PLAN</CODE>.</P>
+
+<H4><CODE>Plan_Type type() const</CODE></H4>
+<P>This function returns the current <CODE>Plan_Type</CODE>.</P>
+
+<H4><CODE>void free()</CODE></H4>
+<P>This destroys the current <CODE>fftw_plan</CODE>, and reinitializes as
+<CODE>Plan_Type NULL_PLAN</CODE>.</P>
+
+<H4><CODE>Plan_Dir direction() const</CODE></H4>
+<P>Returns the direction of the current plan.</P>
+
+<H4><CODE>void direction(Plan_Dir dir)</CODE></H4>
+<P>Sets the direction of the plan to <CODE>dir</CODE>.</P>
+
+<H4><CODE>void fourier() const</CODE></H4>
+<P>This performs the forward Fourier transform of <CODE>in</CODE>, and stores
+the results in <CODE>out</CODE>.</P>
+
+<H4><CODE>void ifourier() const</CODE></H4>
+<P>This performs the inverse Fourier transform of <CODE>out</CODE>, and stores
+the results in <CODE>in</CODE>.</P>
+
+<H4><CODE>void power(const Vec_DP&amp; signal, Vec_DP&amp; pwr)
+const</CODE></H4>
+<P>This calculates the power-spectrum of <CODE>signal</CODE>, and stores the
+results in <CODE>pwr</CODE>. The power-spectrum is estimated with
+<EM>N</EM> frequency bins, where <EM>N</EM> is the size of <CODE>pwr</CODE>, by
+averaging over the periodograms of 50% overlapping samples of
+<CODE>signal</CODE>. A <EM>Welch</EM> windowing function is used to
+eliminate aperiodicity artifacts, and the <CODE>signal</CODE> is demeaned
+before the power is calculated. The Plan must be of <CODE>Plan_Type
+R2R_PLAN</CODE>, and <CODE>pwr</CODE> must have the same size as the vectors
+used by the plan. The vector <CODE>signal</CODE> must have size greater than or
+equal to that of <CODE>pwr</CODE>. If any of these requirements are not met, a
+runtime error will occur. The power is normalized to be independent of both the
+size of <CODE>signal</CODE>, and the frequency resolution used.</P>
+
+<H4><CODE>void cross_spectrum(const Vec_DP&amp; signal1, const Vec_DP&amp;
+signal2, Vec_CPLX_DP&amp; cross) const</CODE></H4>
+<P>This calculates the cross-spectrum of <CODE>signal1</CODE> and
+<CODE>signal2</CODE>, and stores the results in <CODE>cross</CODE>. The
+cross-spectrum is estimated with <EM>N</EM> frequency bins, where <EM>N</EM> is
+the size of <CODE>cross</CODE>, by averaging over the products of the Fourier
+Transforms of 50% overlapping samples of <CODE>signal1</CODE> and
+<CODE>signal2</CODE>. A <EM>Welch</EM> windowing function is used to eliminate
+aperiodicity artifacts, and the signals are demeaned before the calculation.
+The Plan must be of <CODE>Plan_Type C2C_PLAN</CODE>, and <CODE>cross</CODE>
+must have the same size as the vectors used by the plan. The vectors
+<CODE>signal1</CODE> and <CODE>signal2</CODE> must be the same size (greater
+than or equal to that of <CODE>cross</CODE>). If any of these requirements are
+not met, a runtime error will occur. The cross-spectrum is normalized to be
+independent of both the size of the signals, and the frequency resolution
+used.</P>
+
+<H4><CODE>void spectra(const Vec_DP&amp; signal1, const Vec_DP&amp; signal2,
+Vec_DP&amp; pow1, Vec_DP&amp; pow2, Vec_CPLX_DP&amp; cross) const</CODE></H4>
+<P>This calculates the power-spectra of two signals, plus the cross-spectrum
+between them.  The Plan must be of <CODE>Plan_Type C2C_PLAN</CODE>, and
+<CODE>pow1</CODE>, <CODE>pow2</CODE>, and <CODE>cross</CODE> must all have the
+same size as the vectors used by the plan. The vectors <CODE>signal1</CODE> and
+<CODE>signal2</CODE> must be the same size (greater than or equal to that of
+the plan). If any of these requirements are not met, a runtime error will
+occur.</P>
+
+<H4><CODE>void coherence(const Vec_DP&amp; signal1, const Vec_DP&amp; signal2,
+Vec_DP&amp; coh) const</CODE></H4>
+<P>This calculates the coherence function of <CODE>signal1</CODE> and
+<CODE>signal2</CODE>, and stores the results in <CODE>coh</CODE>. The coherence
+function is simply the absolute value of the cross-spectrum, divided by the
+square-root of the products of the power-spectra of the two signals. The Plan
+must be of <CODE>Plan_Type C2C_PLAN</CODE>, and <CODE>coh</CODE> must have the
+same size as the vectors used by the plan. The vectors <CODE>signal1</CODE> and
+<CODE>signal2</CODE> must be the same size (greater than or equal to that of
+<CODE>coh</CODE>). If any of these requirements are not met, a runtime error
+will occur.</P>
+
+<H4><CODE>void filter(const Vec_DP&amp; signal, Vec_DP&amp; sigflt, const
+Filter&amp; filt) const</CODE></H4>
+<P>This filters the vector <CODE>signal</CODE>, using the filter-object
+<CODE>filt</CODE>, and stores the results in the vector <CODE>sigflt</CODE>.
+The vectors <CODE>signal</CODE> and <CODE>sigflt</CODE> must have the same
+(non-zero) size. The plan must be of <CODE>Plan_Type R2R_PLAN</CODE>, and must
+be initialized with vectors of size greater than or equal to the size of the
+input and output signals. If any of these requirements are not met, a runtime
+error will occur. The input signal is demeaned for the filtering, and then a
+fraction of the mean equal to the amplitude of the filter at zero, is added
+back to the result. This means that for band-pass and high-pass filters, the
+mean is not added back on. For low-pass filters, the entire mean is added back,
+and for filters with notches near zero, some fraction may be added back on,
+depending on the notch location and width. If the size of the plan vectors is
+larger than that of the signals, then the input signal will be zero-padded to
+that size. This is very important for filtering non-periodic signals. You can
+estimate how much padding should be used with the filter-object member function
+<CODE>Filter::estimate_padded_size()</CODE>.</P>
+
+<H4><CODE>void hilbert(const Vec_DP&amp; signal, Vec_CPLX_DP&amp; hilb)
+const</CODE></H4>
+This function calculates the Hilbert transform of <CODE>signal</CODE>. The
+result is placed in the imaginary part of <CODE>hilb</CODE>. The real part of
+<CODE>hilb</CODE> is the orginal signal minus its mean. This means that
+<CODE>hilb</CODE> represents the complex analytic function of which
+<CODE>signal</CODE> was presumed to be the real part. Instantaneous phase and
+amplitudes can then be obtained by simply applying the functions
+<CODE>arg()</CODE> and <CODE>abs()</CODE>, respectively. The sizes of
+<CODE>signal</CODE> and <CODE>hilb</CODE> must be the same. The size of the plan
+must be greater than or equal to the size of those vectors. If the plan size is
+bigger, then the input vector will be padded with zeros for the calculation. This
+may be necessary if the length of the input vector has large prime factors, in
+which case you will want to use the <CODE>good_size()</CODE> function to find a
+good padded length. The Plan must be of <CODE>Plan_Type C2C_PLAN</CODE></P> 
+
+<P><A HREF="fftw3xx.htm">Back to FFTW</A></P>
+
+</BODY>
+</HTML>

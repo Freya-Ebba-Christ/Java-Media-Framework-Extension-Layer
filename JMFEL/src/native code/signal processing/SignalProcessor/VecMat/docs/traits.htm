@@ -1,0 +1,119 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"
+  "http://www.w3.org/TR/REC-html40/transitional.dtd">
+<HTML>
+<HEAD>
+  <TITLE>VecMat - Traits</TITLE>
+  <META HTTP-EQUIV="Content-Type" CONTENT="text/html;charset=iso-8859-1">
+  <META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+  <META NAME="Author" CONTENT="Kevin Dolan">
+  <LINK HREF="vecmat.css" REL="stylesheet" TYPE="text/css">
+</HEAD>
+
+<BODY>
+
+<H1>The Traits Support Class.</H2>
+
+<P>A traits class is provided which contains information about types which the
+various <EM>VecMat</EM> routines need to operate properly. It consists primarily
+of typedefs. By making specializations of this class, you can control how the
+software treats that type. Two additional types are also provided which are used
+by the Traits class:<P>
+
+<DIV CLASS=sc>
+<P>struct true_type</P>
+<P>struct false_type</P>
+</DIV>
+
+<P>Each of these types has a conversion operator which allows then to be
+converted to type <CODE>bool</CODE>. The Traits class will set several flags by
+making a typedef to one of these two types. This is done instead of providing a
+function or static value for the flag, because it allows for template
+specification or function overloading based on the value of the flag.</P>
+
+<H3>Traits&lt;T&gt;</H3>
+
+<P>This is a numeric traits structure used to provide information about various
+types. This class is included by "vm_basic.h", and is used internally by the
+<CODE>Vector</CODE> and <CODE>Matrix</CODE> classes. The default definition
+is:</P>
+
+<DIV CLASS=sc>
+<P>template &lt;class T&gt;</P>
+<P>struct Traits</P>
+<P>{</P>
+<P>&nbsp; typedef T real_type;</P>
+<P>&nbsp; typedef T float_type;</P>
+<P>&nbsp; typedef false_type is_int;</P>
+<P>&nbsp; typedef false_type is_float;</P>
+<P>&nbsp; typedef false_type is_complex;</P>
+<P>&nbsp; typedef false_type is_specialized;</P>
+<P>&nbsp; typedef false_type is_simple;</P>
+<P>&nbsp; static T zero()</P>
+<P>&nbsp; {</P>
+<P>&nbsp; &nbsp; static T zero_;</P>
+<P>&nbsp; &nbsp; return zero_;</P>
+<P>&nbsp; }</P>
+<P>};</P>
+</DIV>
+
+<P>The <CODE>real_type</CODE> type is used for the complex constructors, and
+for the <CODE>abs()</CODE> function, to determine the real base of a complex
+type. The <CODE>float_type</CODE> is used by template functions which can
+operate on both integer and floating-point types, but which must return a
+floating-point type. It is <CODE>double</CODE> for all integer types, and for
+the real and complex floating-point types, it is the type itself. For
+non-specialized types it is also just the type itself (including pointers).</P>
+
+<P>The <CODE>is_specialized</CODE> flag should be a typedef for
+<CODE>true_type</CODE> for any type that has a specialization of this structure.
+The <CODE>is_simple</CODE> flag should be a typedef for <CODE>true_type</CODE>
+for POD types, and classes for which the default constructor and destructor
+don't do anything. If this is the case, then the <CODE>NoInit</CODE> vector and
+matrix constructors will not initialize the values of their elements, nor will
+the <CODE>reshape()</CODE> member function. If it is not set, then they will
+initialize their elements with the copy constructor of type <CODE>T</CODE> to a
+copy of a default constructed object. The <CODE>is_int</CODE> flag should be
+a typedef of <CODE>true_type</CODE> for integer types, and a typedef of
+<CODE>false_type</CODE> for all others. This can be used for error checking in
+template functions which only make sense for integer types. Likewise, the
+<CODE>is_float</CODE> flag should be a typedef of <CODE>true_type</CODE> for
+floating-point types, and a typedef of <CODE>false_type</CODE> for all others.
+Finally, the <CODE>is_complex</CODE> flag should be a typedef of
+<CODE>true_type</CODE> for specialized complex types, and of
+<CODE>false_type</CODE> for all others.</P>
+
+<P>The <CODE>zero()</CODE> function returns an apporpriate zero value for that
+type. For standard numeric and pointer types, it returns 0. For other types, it
+returns a default constructed object.<P>
+
+<P>If the <CODE>is_simple</CODE> flag is set, then the elements will not be
+destroyed by the vector or matrix destructors either. This improves the
+efficiency of working with standard numeric types and pointers, where it is not
+necessary to go through the trouble of looping through the data, and calling
+the destructor for each element. A partial specialization is provided for
+pointer types which gives <CODE>true_type</CODE> for pointer types.</P>
+
+<P>The following types have specializations of the <CODE>Traits</CODE>
+structure:</P>
+
+<DIV CLASS=cl>
+<P>bool</P>
+<P>char</P>
+<P>signed char</P>
+<P>unsigned char</P>
+<P>short</P>
+<P>unsigned short</P>
+<P>int</P>
+<P>unsigned int</P>
+<P>long</P>
+<P>unsigned long</P>
+<P>float</P>
+<P>double</P>
+<P>std::complex&lt;float&gt;</P>
+<P>std::complex&lt;double&gt;</P>
+</DIV>
+
+<P><A HREF="vecmat.htm">Back to Index</A></P>
+
+</BODY>
+</HTML> 

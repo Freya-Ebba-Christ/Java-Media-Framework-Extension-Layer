@@ -1,0 +1,29 @@
+K 25
+svn:wc:ra_dav:version-url
+V 102
+/svn/javaeeg/!svn/ver/23/trunk/Beaker/src/native%20code/signal%20processing/SignalProcessor/fftw-3.1.2
+END
+fftw3.h
+K 25
+svn:wc:ra_dav:version-url
+V 110
+/svn/javaeeg/!svn/ver/23/trunk/Beaker/src/native%20code/signal%20processing/SignalProcessor/fftw-3.1.2/fftw3.h
+END
+libfftw3l-3.lib
+K 25
+svn:wc:ra_dav:version-url
+V 118
+/svn/javaeeg/!svn/ver/23/trunk/Beaker/src/native%20code/signal%20processing/SignalProcessor/fftw-3.1.2/libfftw3l-3.lib
+END
+libfftw3-3.lib
+K 25
+svn:wc:ra_dav:version-url
+V 117
+/svn/javaeeg/!svn/ver/23/trunk/Beaker/src/native%20code/signal%20processing/SignalProcessor/fftw-3.1.2/libfftw3-3.lib
+END
+libfftw3f-3.lib
+K 25
+svn:wc:ra_dav:version-url
+V 118
+/svn/javaeeg/!svn/ver/23/trunk/Beaker/src/native%20code/signal%20processing/SignalProcessor/fftw-3.1.2/libfftw3f-3.lib
+END

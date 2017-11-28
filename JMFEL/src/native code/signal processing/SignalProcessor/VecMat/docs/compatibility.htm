@@ -1,0 +1,51 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"
+  "http://www.w3.org/TR/REC-html40/transitional.dtd">
+<HTML>
+<HEAD>
+  <TITLE>VecMat - Compatibility Issues</TITLE>
+  <META HTTP-EQUIV="Content-Type" CONTENT="text/html;charset=iso-8859-1">
+  <META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+  <META NAME="Author" CONTENT="Kevin Dolan">
+  <LINK HREF="vecmat.css" REL="stylesheet" TYPE="text/css">
+</HEAD>
+
+<BODY>
+
+<H1>17. Compatibility Issues.</H1>
+
+<P>This software makes extensive use of the <EM>C++ Standard Library</EM>. It
+is therefore necessary that your compiler properly support the <EM>Standard
+Library</EM>, and in particular, the <EM>Standard Template Library</EM>
+(<EM>STL</EM>). One possible source of compiler difficulties may be in the use
+of streaming IO. The <EM>VecMat</EM> software uses the <EM>Standard
+Library</EM> header files "iostream" and "fstream". The <EM>Standard
+Library</EM> streaming IO headers cannot be used within the same project as the
+nonstandard streaming IO headers, such as "iostream.h".</P>
+
+<P>I have only tested the current version of the software on the following
+platforms so far.</P>
+
+<UL>
+  <LI>gcc 3.2 & 3.4 (Windows 2000 & XP, using MinGW)</LI>
+  <LI>gcc 3.2 & 3.4 (Linux)</LI></UL>
+</UL>
+
+<P>It seems to work ok on these platforms. It may or may not work on the latest
+version of <EM>Microsoft VC++</EM>, but I do know that it does not work on
+older versions, due to non-compliance with the <CODE>C++</CODE> standard.</P>
+
+<P>I have not yet tested in on any 64bit platforms. It <EM>should</EM> work, as
+I have been very careful to use <CODE>size_t</CODE> and <CODE>ptrdiff_t</CODE>
+whenever working with integers which refer to memory sizes or differences.
+However, some warnings may occur due to implicit casting from 64bit integer
+types to 32bit integer types.</P>
+
+<P>If you find any errors or compatibility problems, please let me know.
+Likewise if you find that the code works on platforms other than those I have
+tested it on. Please send any feedback to
+<A HREF="mailto:kdolan@mailaps.org">kdolan@mailaps.org</A></P>
+
+<P><A HREF="vecmat.htm">Back to Index</A></P>
+
+</BODY>
+</HTML>

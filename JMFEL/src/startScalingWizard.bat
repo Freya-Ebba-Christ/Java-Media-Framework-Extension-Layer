@@ -1,0 +1,1 @@
+java media.protocol.gtec.ScalingWizard -device usbAmpA

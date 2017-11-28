@@ -1,0 +1,260 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"
+  "http://www.w3.org/TR/REC-html40/transitional.dtd">
+<HTML>
+<HEAD>
+  <TITLE>VecMat - Classes and Global Functions for Statistics and Sorting</TITLE>
+  <META HTTP-EQUIV="Content-Type" CONTENT="text/html;charset=iso-8859-1">
+  <META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+  <META NAME="Author" CONTENT="Kevin Dolan">
+  <LINK HREF="vecmat.css" REL="stylesheet" TYPE="text/css">
+</HEAD>
+
+<BODY>
+
+<H1>7. Classes and Global Functions for Statistics and Sorting.</H1>
+
+<P>The <EM>VecMat</EM> software provides many global support functions and
+classes for use with vectors and matrices. To use these functions, include the
+header file "vec_mat.h" instead of "vm_basic.h".</P>
+
+<H2>7.1. Statistics</H2>
+
+<H3>7.1.1. Histogram&lt;T&gt;</H3>
+
+<P>This class allows you to construct histograms of vectors. The constructor
+allows you to set the minimum and maximum values of the histogram to be
+produced, and the number of bins to be used.</P>
+
+<H3>Constructors.</H3>
+
+<H4><CODE>Histogram&lt;T&gt;()</CODE></H4>
+<P>The default constructor creates an empty histogram with zero bins.</P>
+
+<H4><CODE>Histogram&lt;T&gt;(const Histogram&lt;T&gt;&amp; h)</CODE></H4>
+<P>The copy constructor copies the parameters that are set for <CODE>h</CODE>,
+and attaches itself to the same vector as <CODE>h</CODE>.</P>
+
+<H4><CODE>Histogram&lt;T&gt;(const Vector&lt;T&gt;&amp; x)</CODE></H4>
+<P>This creates a Histogram and attaches the vector <CODE>x</CODE> to it. This
+means that the histogram object contains a non-owner view of <CODE>x</CODE>.
+The histogram's range will be set to the range of the data in <CODE>x</CODE>,
+and the number of bins will be given by</P>
+
+<DIV CLASS=sc>
+<P>nb = exp(0.626 + 0.41 * log(n - 1.0));</P>
+</DIV>
+
+<P>where <CODE>n</CODE> is the size of <CODE>x</CODE>. If <CODE>n</CODE> is
+zero or one, then the number of bins is also zero or one, respectively.</P>
+
+<H3>Member functions and operators.</H3>
+
+<H4><CODE>Histogram&lt;T&gt;&amp; operator=(const Histogram&lt;T&gt;&amp;
+h)</CODE></H4>
+<P>The assignment operator copies the parameters from one h, and initializes
+histogram to the same data.</P>
+
+<H4><CODE>void set_range(T low = 0, T high = 0)</CODE></H4>
+<P>Use this function to set, or reset the range of an already constructed
+histogram object. If <CODE>low</CODE> is not less than <CODE>high</CODE>, then
+this sets the object to determine the values from the minimum and maximum of
+the attached data.</P>
+
+<H4><CODE>void set_bins(size_t bins = 0)</CODE></H4>
+<P>Use this to set, or reset the number of bins to be used for the histogram.
+If <CODE>bins</CODE> is zero (the default), then this sets the object to
+determine the number of bins from the attached data, using the formula given
+above.</P>
+
+<H4><CODE>double low() const</CODE></H4>
+<P>Returns the low edge of the range.</P>
+
+<H4><CODE>double high() const</CODE></H4>
+<P>Returns the high edge of the range.</P>
+
+<H4><CODE>size_t bins() const</CODE></H4>
+<P>Returns the number of bins the histogram is set to use.</P>
+
+<H4><CODE>void attach(const Vector&lt;T&gt;&amp; x)</CODE></H4>
+<P>This attaches the vector <CODE>x</CODE> to the histogram. This means that
+the histogram object contains a non-owner view of <CODE>x</CODE>. The
+histogram's range will be set to the range of the data in <CODE>x</CODE>, but
+the number of bins will be left unchanged, unless it is zero, in which case it
+will be set according to the above formula.</P>
+
+<H4><CODE>Vec_INT hist() const</CODE></H4>
+<P>This returns a deep copy of the histogram's internal vector of integers. The
+range corresponding to each bin is simply <CODE>(high - low) / bins</CODE>.
+Thus bin <CODE>n</CODE> corresponds to the range:</P>
+
+<DIV CLASS=sc>
+<P>low + n * (high - low) / bins</P>
+</DIV>
+
+<P>through</P>
+
+<DIV CLASS=sc>
+<P>low + (n + 1) * (high - low) / bins</P>
+</DIV>
+
+<H4><CODE>operator Vec_INT() const</CODE></H4>
+<P>The conversion operator allows you to pass the histogram to a function
+expecting a <CODE>const Vec_INT&amp;</CODE>. It passes a deep copy of the
+histogram's internal vector of values.</P>
+
+<H2>7.1.2. Statistics Functions.</H2>
+
+<H4><CODE>template &lt;class T&gt; Traits&lt;T&gt;::float_type mean(const
+Vector&lt;T&gt;&amp; x)</CODE></H4>
+<P>Calculates the mean of the vector <CODE>x</CODE>. <CODE>T</CODE> must be a
+type for which the <CODE>Traits</CODE> class specifies an appropriate
+<CODE>float_type</CODE>. For all standard integer types the
+<CODE>float_type</CODE> is <CODE>double</CODE>. For <CODE>float</CODE>,
+<CODE>double</CODE>, <CODE>std::complex&lt;float&gt;</CODE>, and
+<CODE>std::complex&lt;double&gt;</CODE>, it is simply the type itself.</P>
+
+<H4><CODE>template &lt;class T&gt; Traits&lt;T&gt;::float_type variance(const
+Vector&lt;T&gt;&amp; x)</CODE></H4>
+<P>Calculates the variance of the vector <CODE>x</CODE>. The variance is given
+by</P>
+
+<DIV CLASS=sc>
+<P>var = 1/N * SUM((x[i] - mean(x))^2)<P>
+</DIV>
+
+<P>Where <CODE>N</CODE> is the size of the vector. This function should only
+be used for standard integer and floating point types. For integer types the
+return type is <CODE>double</CODE>.</P>
+
+<H4><CODE>template &lt;class T&gt; Traits&lt;T&gt;::float_type
+s_variance(const Vector&lt;T&gt;&amp; x)</CODE></H4>
+<P>Estimates the variance of a distribution assuming that the vector
+<CODE>x</CODE> consists of samples from the distribution. This is similar to
+the variance, except that instead of dividing by the size of the vector, we
+instead divide by the size minus one.</P>
+
+<DIV CLASS=sc>
+<P>var = 1/N-1 * SUM((x[i] - mean(x))^2)<P>
+</DIV>
+
+<P>This function should only be used for standard integer and floating point
+types. For integer types the return type is <CODE>double</CODE>.</P>
+
+<H4><CODE>template &lt;class T&gt; Traits&lt;T&gt;::float_type stdv(const
+Vector&lt;T&gt;&amp; x)</CODE></H4>
+<P>Calculates the standard-deviation of the vector <CODE>x</CODE>. This is
+equivelent to <CODE>sqrt(variance(x))</CODE>.</P>
+
+<H4><CODE>template &lt;class T&gt; Traits&lt;T&gt;::float_type s_stdv(const
+Vector&lt;T&gt;&amp; x)</CODE></H4>
+<P>Estimates the standard-deviation of a distribution assuming that the vector
+<CODE>x</CODE> consists of samples from the distribution. This is equivelent
+to <CODE>sqrt(s_variance(x))</CODE>.</P>
+
+<H4><CODE>template &lt;class T&gt; Vec_DP prob_dens_func(const
+Vector&lt;T&gt;&amp; x, size_t bins, T low = 0, T high = 0)</CODE></H4>
+<P>This returns a vector of <CODE>doubles</CODE>, which store the probability
+density function of the vector <CODE>x</CODE>. The range corresponding to each
+bin is simply <CODE>(high - low) / bins</CODE>. Thus bin <CODE>n</CODE>
+corresponds to the range:</P>
+
+<DIV CLASS=sc>
+<P>low + n * (high - low) / bins</P>
+</DIV>
+
+<P>through</P>
+
+<DIV CLASS=sc>
+<P>low + (n + 1) * (high - low) / bins</P>
+</DIV>
+
+<P>If <CODE>bins</CODE> is zero, then it will be set according to</P>
+
+<DIV CLASS=sc>
+<P>nb = exp(0.626 + 0.41 * log(n - 1.0));</P>
+</DIV>
+
+<P>where <CODE>n</CODE> is the size of <CODE>x</CODE>. If <CODE>n</CODE> is
+zero or one, then the number of bins is also zero or one, respectively. The PDF
+is normalized so that the sum of the returned vector will be one. The type
+<CODE>T</CODE> should be a standard integer or floating point type. If no
+values are given for the optional <CODE>high</CODE> and <CODE>low</CODE>
+parameters, then their values will be set to the minimum and maximum values of
+<CODE>x</CODE>. This will also happen if <CODE>high <= low</CODE>.</P>
+
+<H2>7.2. Sorting.</H2>
+
+<H3>7.2.1. IndirectComp&lt;T&gt;</H3>
+
+<P>This function object compares two integers by comparing the elements of a
+vector with indices given by those integers. This function object is used by
+the support function <CODE>index()</CODE> to create a vector of integers sorted
+according to the ordering that would sort the vector passed to the
+function. This class is provided by "vm_tools.h". Include "vec_mat.h" instead
+of "vm_basic.h" if you want to use it</P>
+
+<H3>Constructors.</H3>
+
+<H4><CODE>IndirectComp&lt;T&gt;()</CODE></H4>
+<P>The default constructor just creates the object. A vector can be attached
+later using the <CODE>attach()</CODE> member function.</P>
+
+<H4><CODE>IndirectComp&lt;T&gt;(const IndirectComp&lt;T&gt;&amp;
+icomp)</CODE></H4>
+<P>The copy constructor attaches the vector attached to <CODE>icomp</CODE> to
+the new object.</P>
+
+<H4><CODE>IndirectComp&lt;T&gt;(const Vector&lt;T&gt;&amp; x)</CODE></H4>
+<P>This constructor attaches the vector <CODE>x</CODE> to the function object.
+This means that the <CODE>IndirectComp</CODE> object contains an iterator to
+the beginning of the vector. If this function object is explicitly used, keep
+in mind that the internal iterator will be invalidated if anything happens to
+the attached vector that would cause its view to be changed.</P>
+
+<H3>Member functions and operators.</H3>
+
+<H4><CODE>void attach(const Vector&lt;T&gt;&amp; x)</CODE></H4>
+<P>This attaches a vector to the function object, by storing an iterator to the
+beginning of the vector.</P>
+
+<H4><CODE>bool operator()(size_t a, size_t b) const</CODE></H4>
+<P>The function call operator takes two integers, <CODE>a</CODE> and
+<CODE>b</CODE>, and returns <CODE>true</CODE> if <CODE>x[a] &lt; x[b]</CODE>,
+or <CODE>false</CODE> otherwise. Note that if either <CODE>a</CODE> or
+<CODE>b</CODE> is greater than the size of the attached vector, then this will
+result in the vector being indexed out of bounds.</P>
+
+<H3>7.2.2. Sorting Functions.</H3>
+
+<H4><CODE>template &lt;class T&gt; Vector&lt;T&gt; sort(const
+Vector&lt;T&gt;&amp; x)</CODE></H4>
+<P>This uses the <CODE>std::sort()</CODE> routine to do an out-of-place sort on
+<CODE>x</CODE>. This will often be faster than doing an in-place sort with the
+<CODE>sort()</CODE> member function, because this guarantees that standard
+pointers will be used instead of iterators.</P>
+
+<H4><CODE>template &lt;class T, class order&gt; Vector&lt;T&gt; sort(const
+Vector&lt;T&gt;&amp; x, order fn)</CODE></H4>
+<P>This uses the <CODE>std::sort(order fn)</CODE> routine to do an out-of-place
+sort on <CODE>x</CODE>. This will often be faster than doing an in-place sort
+with the <CODE>sort()</CODE> member function, because this guarantees that
+standard pointers will be used instead of iterators. In this case comparison is
+done with the ordering function object <CODE>order</CODE>. This can be any
+object with a function call operator that takes two arguments of type
+<CODE>T</CODE>, and returns a <CODE>bool</CODE>. It can also be any
+non-overloaded function pointer with the above argument and return types.</P>
+
+<H4><CODE>template &lt;class T&gt; Vector&lt;int&gt; index(const
+Vector&lt;T&gt;&amp; x)</CODE></H4>
+<P>This returns a vector of integers <CODE>indx</CODE>, such that
+<CODE>x[indx[I]]</CODE> gives the vector <CODE>x</CODE> in sorted order. This
+function uses the <CODE>std::sort()</CODE> routine, along with the support
+function object <CODE>IndirectComp&lt;T&gt;</CODE> to do the sorting. The
+sorting is done with standard pointers.</P>
+
+
+<P><A HREF="io_tools.htm">Next Section</A></P>
+<P><A HREF="vecmat.htm">Back to Index</A></P>
+
+</BODY>
+</HTML>

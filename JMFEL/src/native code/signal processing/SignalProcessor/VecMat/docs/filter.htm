@@ -1,0 +1,216 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"
+  "http://www.w3.org/TR/REC-html40/transitional.dtd">
+<HTML>
+<HEAD>
+  <TITLE>VecMat - Classes and Functions for Digital Filtering</TITLE>
+  <META HTTP-EQUIV="Content-Type" CONTENT="text/html;charset=iso-8859-1">
+  <META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+  <META NAME="Author" CONTENT="Kevin Dolan">
+  <LINK HREF="vecmat.css" REL="stylesheet" TYPE="text/css">
+</HEAD>
+
+<BODY>
+
+<H1>9. Classes and Functions for Digital Filtering.</H1>
+
+<P>This software provides a class for storing filter characteristics, and for
+producing transfer functions that can be used by other functions to filter data
+(such as the FFTPlan::filter() member function). This class can be used to
+describe Butterworth filters of type low-pass, high-pass, and band-pass. It can
+also supply band-stop notches for those filters. A maximum of ten notches is
+used by default. This value can be changed by modifying the line</P>
+
+<DIV CLASS=sc>
+<P>const size_t MAX_NOTCHES_ = 10;</P>
+</DIV>
+
+<P>in the "vm_filter.h" header file.</P>
+
+<H2>9.1. Filter Types.</H2>
+
+<P>An enumeration type <CODE>Filter_Type</CODE> is provided for use with this
+class. It can take on one of four values:</P>
+
+<UL>
+  <LI><CODE>NOTCH</CODE> - Flat filter.</LI>
+  <LI><CODE>LOW_PASS</CODE> - Butterworth low-pass filter.</LI>
+  <LI><CODE>HIGH_PASS</CODE> - Butterworth high-pass filter.</LI>
+  <LI><CODE>BAND_PASS</CODE> - Butterworth band-pass filter.</LI>
+<UL>
+
+<H2>9.2. The Filter Class.</H2>
+
+<P>This class stores and manages the filter characteristics.</P>
+
+<H3>9.2.1. Constructors.</H3>
+ 
+<H4><CODE>Filter()</CODE></H4>
+<P>Constructs a default filter object. The default is a flat filter with no
+notches. The default order is 4, and the default sampling-rate is 2.</P>
+
+<H4><CODE>Filter(const Filter&amp; fltr)</CODE></H4>
+<P>The copy constructor simply makes an exact copy of <CODE>fltr</CODE>.</P>
+
+<H4><CODE>Filter(Filter_Type t, double sr = 2, unsigned int o = 4, double e1 =
+0, double e2 = 0)</CODE></H4>
+<P>This constructor allows you to stipulate the basic characteristics of the
+filter upon construction. If a notch filter designated, then the
+<CODE>e1</CODE> and <CODE>e2</CODE> arguments are ignored. If a low-pass or
+high-pass filter is designated, then the <CODE>e2</CODE> argument is ignored,
+and <CODE>e1</CODE> is taken as the high or low edge frequency, respectively.
+If a band-pass filter is designated, then <CODE>e1</CODE> and <CODE>e2</CODE>
+are the low and high edges.</P>
+<P>If the edge values are not given, or the given values do not make sense (for
+example, the high-edge could be lower than the low-edge, or one of the edges
+could be negative, or above the Nyquist frequency), then the following rules
+are used to determine the defaults:</P>
+<P>Low-Pass: The high-edge is set to the sampling rate-divided by 4.</P>
+<P>High-Pass: The low-edge is set to the sampling rate-divided by 4.</P>
+<P>Band-Pass: The low-edge is set to the sampling rate-divided by 8, and the
+high-edge is set to the sampling-rate divided by 4.</P> 
+
+<H3>9.2.2. Member functions.</H3>
+
+<H4><CODE>Filter&amp; operator=(const Filter&amp; fltr)</CODE></H4>
+<P>The assignment operator just copies the contents of <CODE>fltr</CODE>.</P>
+
+<H4><CODE>Filter_Type type() const</CODE></H4>
+<P>Returns the current filter type.</P>
+
+<H4><CODE>void type(Filter_Type ty)</CODE></H4>
+<P>Sets the filter type. The high and low edge frequencies will either be set
+to their defaults, or adjusted to be between the existing edge and either zero
+or the Nyquist frequency.</P>
+
+<H4><CODE>double samp_rate() const</CODE></H4>
+<P>Returns the current sampling rate.</P>
+
+<H4><CODE>bool samp_rate(double sr)</CODE></H4>
+<P>Sets the sampling-rate. If a non-positive value, or a value greater than
+65,535 is given, then the sampling-rate will not be changed, and the function
+will return <CODE>false</CODE>. Otherwise, it returns <CODE>true</CODE>.</P>
+
+<H4><CODE>unsigned int order() const</CODE></H4>
+<P>Returns the current filter order.</P>
+
+<H4><CODE>bool order(unsigned int ord)</CODE></H4>
+<P>Sets the order of the filter. If a value greater than 64, or zero, is given,
+the order is not changed, and the function will return <CODE>false</CODE>.
+Otherwise, it returns <CODE>true</CODE>.</P>
+
+<H4><CODE>double low() const</CODE></H4>
+<P>Returns the current low-edge. A value of zero is returned for notch and
+low-pass filters.</P>
+
+<H4><CODE>bool low(double lw)</CODE></H4>
+<P>Sets the low-edge of the filter. If the value is greater than the Nyquist
+frequency, or zero, or greater than the high-edge (for band-pass filters), or
+if the filter type is notch or low-pass, then the value is not changed, and the
+function will return <CODE>false</CODE>. Otherwise, it returns
+<CODE>true</CODE>.</P>
+
+<H4><CODE>double high() const</CODE></H4>
+<P>Returns the current high-edge. A value of zero is returned for notch and
+high-pass filters.</P>
+
+<H4><CODE>bool high(double hi)</CODE></H4>
+<P>Sets the high-edge of the filter. If the value is greater than the Nyquist
+frequency, or zero, or less than the low-edge (for band-pass filters), or if
+the filter type is notch or high-pass, then the value is not changed, and the
+function will return <CODE>false</CODE>. Otherwise, it returns
+<CODE>true</CODE>.</P>
+
+<H4><CODE>size_t num_notches() const</CODE></H4>
+<P>Returns the current number of notches.</P>
+
+<H4><CODE>double notch_freq(size_t i) const</CODE></H4>
+<P>Returns the frequency of notch number <CODE>i</CODE>. A runtime error will
+occur if the notches are indexed out of bounds.</P>
+
+<H4><CODE>double notch_width(size_t i) const</CODE></H4>
+<P>Returns the width of notch number <CODE>i</CODE>. A runtime error will occur
+if the notches are indexed out of bounds.</P>
+
+<H4><CODE>bool add_notch(double f, double w)</CODE></H4>
+<P>Adds a new notch to the filter. There can be no more than 10 notches. The
+notch frequency must be between 0 and the Nyquist frequency. The width must be
+positive, and not more than half the Nyquist frequency. If any of these
+requirements are not met, no notch will be added, and the function will return
+<CODE>false</CODE>. Otherwise, it returns <CODE>true</CODE>.</P>
+
+<H4><CODE>bool edit_notch(size_t i, double f, double w)</CODE></H4>
+<P>Edits notch <CODE>i</CODE> of the filter. The notch must exist. The notch
+frequency must be between 0 and the Nyquist frequency. The width must be
+positive, and not more than half the Nyquist frequency. If any of these
+requirements are not met, the notch will not be modified, and the function will
+return <CODE>false</CODE>. Otherwise, it returns <CODE>true</CODE>.</P>
+
+<H4><CODE>bool remove_notch(size_t i)</CODE></H4>
+<P>Removes notch <CODE>i</CODE> from the filter. Returns <CODE>false</CODE> if
+the notch does not exist, and <CODE>true</CODE> otherwise.</P>
+
+<H4><CODE>void clear_notches()</CODE></H4>
+<P>Removes all notches from the filter.</P>
+
+<H4><CODE>void sort_notches()</CODE></H4>
+<P>Sorts the notches by frequency, from lowest to highest.</P>
+
+<H4><CODE>void make_filter(Vec_DP&amp; pwr, double lf = 0, double hf = 0)
+const</CODE></H4>
+<P>Constructs the power-spectrum of the filter in vector <CODE>pwr</CODE>. The
+power will be a symmetric function, meaning that if the size of
+<CODE>pwr</CODE> is <EM>N</EM>, then <CODE>pwr[N/2]</CODE> will be the power at
+the Nyquist frequency, and indices greater than <EM>N/2</EM>, correspond to
+negative frequencies. Note that the power is the square of the transfer
+function that you would use for actual filtering.</P>
+<P>The optional parameters <CODE>lf</CODE> and <CODE>hf</CODE> can be used to
+set the frequency range to be viewed. If no values are given, or if the values
+do not make sense, then the default will be to generate the full frequency
+range.</P>
+
+<H4><CODE>bool read(const string&amp; parameters)</CODE></H4>
+<P>Reads in the filter parameters from a file. The format for this file is to
+have keywords followed by values. An example file would be:</P>
+
+<DIV CLASS=sc>
+<P>samp_rate       1000.25</P>
+<P>order           6</P>
+<P>low_edge        200</P>
+<P>#high_edge      400</P>
+<P>notch           100 5</P>
+<P>notch           200 3</P>
+</DIV>
+
+<P>Anything other than the above keywords, followed by appropriate numbers,
+will be ignored. The # symbol should be used to comment out a line. The filter
+type will be deduced from the keywords listed. The above file would designate a
+high-pass filter. The first value for the notch keyword is the notch frequency,
+and the second is the notch width. This function parses the file for any of the
+above keywords, and then calls the relevant member functions to set the
+parameters. If the values given in the file are not valid, then the results
+will be the same as if you tried to set those values directly. If the file
+cannot be opened, the function will return false, and the filter will not be
+changed.</P>
+
+<H4><CODE>void write(const string&amp; parameters) const</CODE></H4>
+<P>Writes the filter parameters to a file.</P>
+
+<H2>9.3. Support Functions.</H2>
+
+<H4><CODE>size_t estimate_padded_size(size_t len) const</CODE></H4>
+<P>This function estimates the padded length that should be used when
+filtering non-periodic data, in order to eliminate aperiodicity artifacts. This
+is done by estimating how quickly the <EM>response function</EM> will go to
+zero, where the response function is given by the inverse Fourier transform of
+the transfer function. If you are using the <CODE>FFTPlan::filter()</CODE>
+function to do the filtering, then it is recommended that you also pass this
+length to the <CODE>good_size()</CODE> function from the "vm_fftw3.h" header
+file. This will make sure that the padded size is does not have any large prime
+factors.</P>
+
+<P><A HREF="random.htm">Next Section</A></P>
+<P><A HREF="vecmat.htm">Back to Index</A></P>
+
+</BODY>
+</HTML> 
+   

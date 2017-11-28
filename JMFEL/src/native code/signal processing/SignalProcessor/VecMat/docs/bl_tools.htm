@@ -1,0 +1,851 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"
+  "http://www.w3.org/TR/REC-html40/transitional.dtd">
+<HTML>
+<HEAD>
+  <TITLE>VecMat - CBLAS and LAPACK Wrapper Functions and Classes</TITLE>
+  <META HTTP-EQUIV="Content-Type" CONTENT="text/html;charset=iso-8859-1">
+  <META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+  <META NAME="Author" CONTENT="Kevin Dolan">
+  <LINK HREF="vecmat.css" REL="stylesheet" TYPE="text/css">
+</HEAD>
+
+<BODY>
+
+<H1>16. CBLAS and LAPACK Wrapper Functions and Classes.</H1>
+<P>The header file "vm_bl_tools.h" provides a number of functions and classes
+for using the <EM>CBLAS</EM> and <EM>LAPACK</EM> linear algebra libraries with
+the <EM>VecMat</EM> software. You will need to link to the <EM>CBLAS</EM>
+library to use any of the <EM>CBLAS</EM> wrapper functions, and you will need to
+link to the <EM>LAPACK</EM> and <EM>CBLAS</EM> libraries to use the solver
+classes. If you do not have <EM>LAPACK</EM>, you can still use the
+<EM>CBLAS</EM> features. In any case, the "cblas.h" header file must be
+available.</P>
+
+<P>You can also use the <EM>Intel Math Kernal Library</EM> for your
+<EM>CBLAS</EM> and <EM>LAPACK</EM> support. In this case, you must uncomment the
+<CODE>#define USE_MKL</CODE> directive in the "vm_bl_tools.h" header file, or
+alternatively, pass this directive to the compiler directly. The <EM>mkl</EM>
+include directory must be available, as the "mkl_cblas.h" and "mkl_lapack.h"
+files are included by this software.</P>
+
+<H2>16.1. Special Types Defined for CBLAS functions.</H2>
+<P>Some enumeration types are provided for passing information to <EM>CBLAS</EM>
+functions.</P>
+
+<H4><CODE>enum Trans_Flag</CODE></H4>
+<P>This type is used to inform the <EM>CBLAS</EM> function whether or not to
+use the transpose of a matrix. Its values are:</P>
+
+<UL>
+  <LI><CODE>NO_TRANS</CODE> - Do not take the transpose of the matrix.</LI>
+  <LI><CODE>TRANS</CODE> - Take the transpose of the matrix.</LI>
+  <LI><CODE>TRANS_CONJ</CODE> - Take the conjugate transpose of the complex
+  matrix.</LI>
+</UL>
+
+<H4><CODE>enum Side_Flag</CODE></H4>
+<P>This type is used to tell the <EM>CBLAS</EM> function which order certain
+vectors or matrices should appear in the operation being performed. Its values
+are:</P>
+
+<UL>
+  <LI><CODE>RIGHT</CODE> - The object in question appears on the right.</LI>
+  <LI><CODE>RIGHT</CODE> - The object in question appears on the right.</LI>
+</UL>
+
+<H4><CODE>enum Diag_Flag</CODE></H4>
+<P>This type is used to specify whether the diagonal of a given triangular
+matrix is unit or not. Its values are:</P>
+
+<UL>
+  <LI><CODE>NON_UNIT</CODE> - The diagonal of the matrix is not unit</LI>.
+  <LI><CODE>UNIT</CODE> - The diagonal of the matrix is unit.</LI>
+</UL>
+
+<H4><CODE>enum Up_Lo_Flag</CODE></H4>
+<P>This type is used to tell the <EM>CBLAS</EM> functions whether to use the
+upper or lower part of a given triangular, symmetric, or hermitian matrix. The
+<EM>CBLAS</EM> function will only reference the upper or lower part of the
+matrix. If the matrix is an output parameter, then only the upper or lower part
+will be filled in. Its values are:</P>
+
+<UL>
+  <LI><CODE>UPPER</CODE> - Use the upper part of the matrix.</LI>
+  <LI><CODE>LOWER</CODE> - Use the lower part of the matrix.</LI>
+</UL>
+
+<H4><CODE>enum Conj_Flag</CODE></H4>
+<P>This type is used to specify whether the complex conjugate of a vector is to
+be used. Its values are:</P>
+
+<UL>
+  <LI><CODE>NO_CONJ</CODE> - Do not use the complex conjugate.</LI>
+  <LI><CODE>CONJ</CODE> - Use the complex conjugate.</LI>
+</UL>
+
+<H4><CODE>enum Auto_Complete_Flag</CODE></H4>
+<P>This type is used to tell the wrapper function whether or not to fill in the
+half of a symmetric or hermitian matrix which was not filled in by the
+<EM>CBLAS</EM> function. It is only relevent when the output of the
+<EM>CBLAS</EM> function is a symmetric or hermitian matrix. Its values are:</P>
+
+<UL>
+  <LI><CODE>NO_AUTO_COMPLETE</CODE> - Do not fill in the rest of the matrix.</LI>
+  <LI><CODE>AUTO_COMPLETE</CODE> - Fill in the rest of the matrix.</LI>
+</UL>
+
+<H4><CODE>enum Mat_Layout</CODE></H4>
+<P>This type tells whether the matrix is in row-major or column-major format.
+Its values are:</P>
+
+<UL>
+  <LI><CODE>GENERAL</CODE> - The matrix is not in either format.</LI>
+  <LI><CODE>ROW_MAJOR</CODE> - The matrix is in row-major format.</LI>
+  <LI><CODE>COL_MAJOR</CODE> - The matrix is in column-major format.</LI>
+</UL>
+
+
+<H2>16.2. Row-Major and Column-Major Matrices.</H2>
+<P>One very important issue when mixing <EM>Fortran</EM> and <EM>C/C++</EM>
+routines is the memory layout of two-dimensional arrays. <EM>Fortran</EM> has
+built-in types for such arrays, whereas <EM>C</EM> handles them essentially as
+an array of pointers, where each pointer points to an array of values.</P>
+
+<P>In <EM>Fortran</EM> two-dimensional arrays are always in
+<EM>column-major</EM> format, meaning that each column is stored contiguously
+in memory, and that the beginning of each column starts after the end of the
+previous one (in the case of sub-matrices, there may be a gap between
+columns).</P>
+
+<P>In <EM>C/C++</EM> two-dimenstion arrays are in <EM>row-major</EM> format.
+Each row is stored contiguously in memory, and the beginning of each row
+starts after the end of the previous one. Again, when dealing with sub-matrices
+there may be a gap between columns.</P>
+
+<P>In both cases, the array can be treated as a one-dimensional array whose
+total length is <CODE>ld * m</CODE>, where <CODE>ld</CODE> is the distance
+between rows (for row-major), or columns (for column major), and <CODE>m</CODE>
+is the number of columns (for row-major), or rows (for column-major).
+<CODE>ld</CODE> must be greater-than or equal-to the number of rows
+(for row-major), or columns (for column-major). <EM>Fortran</EM> routines, such
+as <EM>BLAS</EM> and <EM>LAPACK</EM> always assume that the layout is
+column-major. <EM>CBLAS</EM> allows matrices in either format, as long as
+<EM>all</EM> matrices used in a specific function call are in the same
+format.</P>
+
+<P>The <EM>VecMat</EM> software supports both types of matrices. By default
+newly constructed matrices will be in row-major format (unless they are views of
+other objects). A transpose view of a row-major matrix, on the other had, will
+be in column-major format. Since the <EM>CBLAS</EM> functions can deal with
+either type, this allows for a great deal of flexibility. Note however that
+matrices which are not in one of those two formats, can not be used with the
+<EM>CBLAS</EM> functions. A function is provided which informs you of the memory
+layout of a matrix:</P>
+
+<H4><CODE>template &lt;class T&gt; Mat_Layout matrix_layout(const
+Matrix&lt;T&gtl;&amp; x)</CODE></H4>
+<P>This function returns a value of type <CODE>Mat_Layout</CODE> which indicates
+what the memory layout of a matrix is. The value <CODE>GENERAL</CODE> is
+returned if the matrix is not in either row-major or column-major format.</P>
+
+<P>With respect to <EM>VecMat</EM> matrices, a matrix is row-major iff the
+column-stride is 1, and the row-stride is greater-than or equal-to the number of
+columns. It is column-major iff the row-stride is 1, and the column-stride is
+greater-than or equal-to the number of rows. If neither of the strides are 1, or
+the other stride is less than the required amount, then the matrix cannot be
+used in <CODE>CBLAS</CODE> functions.</P>
+
+<H2>16.3. The BlasParam Support Class.</H2>
+
+<P>The <EM>CBLAS</EM> functions take a huge number of parameters, making them
+very difficult and cumbersome to use. The wrapper functions provided by this
+software automatically extract most of this information directly from the
+matrices and vectors they are called for, but some additional parameters are
+often needed to specify things like: where in the equation a specific symmetric
+or triangular matrix should appear, whether or not to use the transpose of a
+specific matrix, whether a triangular matrix is upper-triangular or
+lower-triangular, and many more.</P>
+
+<P>The <CODE>BlasParam</CODE> class is provided as a simple way to manage these
+additional parameters. An object can be created to store the values for the
+various flags which the <EM>CBLAS</EM> function requires, and then the wrapper
+function can simply take a reference to the <CODE>BlasParam</CODE> object as its
+last argument. The object internally contains the following flags:</P>
+
+<UL>
+  <LI><CODE>Trans_Flag trans_flag_a</CODE></LI>
+  <LI><CODE>Trans_Flag trans_flag_b</CODE></LI>
+  <LI><CODE>Up_Lo_Flag uplo_flag</CODE></LI>
+  <LI><CODE>Side_Flag side_flag</CODE></LI>
+  <LI><CODE>Diag_Flag diag_flag</CODE></LI>
+  <LI><CODE>Conj_Flag conj_flag</CODE></LI>
+  <LI><CODE>Auto_Complete_Flag auto_complete_flag</CODE></LI>
+</UL>
+
+<P><CODE>trans_flag_a</CODE> and <CODE>trans_flag_b</CODE> specify whether the
+transpose of matrices should be used. Use <CODE>trans_flag_a</CODE> if the
+<EM>CBLAS</EM> function expects only a single transpose flag, or to indicate the
+first transpose flag if the function expects two. Use <CODE>trans_flag_b</CODE>
+only to indicate the second transpose flag when two are expected. The
+<CODE>uplo_flag</CODE>, <CODE>side_flag</CODE>, and <CODE>diag_flag</CODE>
+parameters should only be used if the <EM>CBLAS</EM> function expects them. The
+<CODE>conj_flag</CODE> parameter is specifically for the complex dot-product
+functions. The <CODE>auto_complete_flag</CODE> parameter can be used any time
+the <EM>CBLAS</EM> function outputs a symmetric or hermitian matrix.</P>
+
+
+<H3>16.3.1. Constructors.</H3>
+
+<H4><CODE>BlasParam()</CODE></H4>
+<P>Creates a default object. The default values are:</P>
+
+<UL>
+  <LI><CODE>trans_flag_a = NO_TRANS</CODE></LI>
+  <LI><CODE>trans_flag_b = NO_TRANS</CODE></LI>
+  <LI><CODE>uplo_flag = UPPER</CODE></LI>
+  <LI><CODE>side_flag = LEFT</CODE></LI>
+  <LI><CODE>diag_flag = NON_UNIT</CODE></LI>
+  <LI><CODE>conj_flag = NO_CONJ</CODE></LI>
+  <LI><CODE>auto_complete_flag = NO_AUTO_COMPLETE</CODE></LI>
+</UL>
+
+<DIV CLASS=clb>
+<P>BlasParam(Trans_Flag transa, Trans_Flag transb = NO_TRANS)</P>
+<P>BlasParam(Up_Lo_Flag uplo)</P>
+<P>BlasParam(Side_Flag side)</P>
+<P>BlasParam(Diag_Flag diag)</P>
+<P>BlasParam(Conj_Flag cf)</P>
+<P>BlasParam(Auto_Complete_Flag acf)</P>
+</DIV>
+
+<P>These constructors allow you to specify a single parameter on construction
+(two in the case of the <CODE>Trans_Flag</CODE> constructor. All other
+parameters are set to their defaults. This is especially useful if the
+<EM>CBLAS</EM> function only needs one parameter, or only needs one which
+differs from the defaults. In such cases, you can simply send the parameter to
+the wrapper function, rather than explicitely construct a <CODE>BlasParam</CODE>
+object.</P>
+
+<H3>16.3.2. Member functions.</H3>
+
+<DIV CLASS=clb>
+<P>void trans_flag_a(Trans_Flag f)</P>
+<P>void trans_flag_b(Trans_Flag f)</P>
+<P>void uplo_flag(Up_Lo_Flag uplo)</P>
+<P>void side_flag(Side_Flag side)</P>
+<P>void diag_flag(Diag_Flag diag)</P>
+<P>void conj_flag(Conj_Flag cf)</P>
+<P>void auto_complete_flag(Auto_Complete_Flag acf)</P>
+</DIV>
+
+<P>These functions set the corresponding flags in the <CODE>BlasParam</CODE>
+object.</P>
+
+<DIV CLASS=clb>
+<P>Trans_Flag trans_flag_a() const</P>
+<P>Trans_Flag trans_flag_b() const</P>
+<P>Up_Lo_Flag uplo_flag() const</P>
+<P>Side_Flag side_flag() const</P>
+<P>Diag_Flag diag_flag() const</P>
+<P>Conj_Flag conj_flag() const</P>
+<P>Auto_Complete_Flag auto_complete_flag() const</P>
+</DIV>
+
+<P>These functions return the value of the corresponding flag.</P>
+
+<H4><CODE>template &lt;class T&gt; void sym_complete(Matrix&lt;T&gt;&amp; A)
+const</CODE></H4>
+<P>This function is used to auto-complete symmetric matrices. If the value of
+<CODE>uplo_flag</CODE> is <CODE>UPPER</CODE>, then the bottom triangular part
+of the matrix is filled in with the corresponding values from the upper
+triangular part. If it is <CODE>LOWER</CODE>, then vice-versa. You can also call
+this function directly. Just set the <CODE>uplo_flag</CODE> parameter to the
+correct value. This function does not check to make sure the matrix is square.
+If it is not, then only the upper-left <CODE>min(m, n) X min(m, n)</CODE>
+portion is referenced.</P>
+
+<H4><CODE>template &lt;class T&gt; void her_complete(Matrix&lt;T&gt;&amp; A)
+const</CODE></H4>
+<P>This function is used to auto-complete hermitian matrices. If the value of
+<CODE>uplo_flag</CODE> is <CODE>UPPER</CODE>, then the bottom triangular part
+of the matrix is filled in with the corresponding values from the upper
+triangular part. If it is <CODE>LOWER</CODE>, then vice-versa. You can also call
+this function directly. Just set the <CODE>uplo_flag</CODE> parameter to the
+correct value. This function does not check to make sure the matrix is square.
+If it is not, then only the upper-left <CODE>min(m, n) X min(m, n)</CODE>
+portion is referenced. This function will fail if <CODE>T</CODE> is not a
+complex type.</P>
+
+<H2>16.4. CBLAS Wrapper Functions.</H2>
+
+<P>This section assumes that the reader is already familiar with the
+<EM>CBLAS</EM> library. Each group of functions is wrapped with a single
+overloaded function which works for all four types (or whichever types are
+appropriate, in the case of functions which are real-only or complex-only).
+Functions for packed matrices, band matrices, and sparse matrices, are not
+included.</P>
+
+<P>In each case, the function name for the wrapper is <CODE>blas_XXXX()</CODE>
+where the XXXX corresponds to the name of the function group. For example, the
+functions <CODE>cblas_sgemm()</CODE>, <CODE>cblas_dgemm()</CODE>,
+<CODE>cblas_cgemm()</CODE>, and <CODE>cblas_zgemm()</CODE>, are all wrapped by
+the overloaded function <CODE>blas_gemm()</CODE>. The <CODE>CBLAS_ORDER</CODE>
+parameter is automatically determined by the wrapper function, as are all vector
+lengths and matrix dimensions. All additional parameters are sent by means of
+the <CODE>BlasParam</CODE> object, which appears as a final optional parameter
+for all wrapper functions which need additional parameters. If the
+<CODE>BlasParam</CODE> argument is not sent, then default parameter values are
+used.</P>
+
+<P>Note that while template notation is used to list these functions here, they
+are not implemented as templates. Instead overloads are made for each of the
+types <CODE>float</CODE>, <CODE>double</CODE>, <CODE>CPLX_SP</CODE>, and
+<CODE>CPLX_DP</CODE>. In cases where only real or only complex versions of the
+<EM>CBLAS</EM> function exist, only the appropriate overloads are provided.
+Detailed explanations of these functions is not provided here. Please refer to
+the <EM>CBLAS</EM> documentation for such specifics.</P>
+
+<H3>16.4.1. Level 1 BLAS functions.</H3>
+
+<DIV CLASS=clb>
+<P>T blas_asum(const Vector&lt;T&gt;&amp; x)</P>
+<P>void blas_axpy(T a, const Vector&lt;T&gt;&amp; x, Vector&lt;T&gt;&amp; y)</P>
+<P>void blas_copy(const Vector&lt;T&gt;&amp; x, Vector&lt;T&gt;&amp; y)</P>
+<P>T blas_dot(const Vector&lt;T&gt;&amp; x, const Vector&lt;T&gt;&amp; y)</P>
+<P>std::complex&lt;T&gt; blas_dot(const Vector&lt;std::complex&lt;T&gt; &gt;&amp;
+x, const Vector&lt;std::complex&lt;T&gt; &gt;&amp; y, const BlasParam&amp; bp)</P>
+<P>T blas_nrm2(const Vector&lt;T&gt;&amp; x)</P>
+<P>T blas_nrm2(const Vector&lt;std::complex&lt;T&gt; &gt;&amp; x)</P>
+<P>void blas_rot(Vector&lt;T&gt;&amp; x, Vector&lt;T&gt;&amp; y, T c, T s)</P>
+<P>void blas_rotg(T&amp; a, T&amp; b, T&amp; c, T&amp; s)</P>
+<P>void blas_rotm(Vector&lt;T&gt;&amp; x, Vector&lt;T&gt;&amp; y, const
+Vector&lt;T&gt;&amp; p)</P>
+<P>void blas_rotmg(T&amp; d1, T&amp; d2, T&amp; b1, const T&amp; b2,
+Vector&lt;T&gt;&amp; p)</P>
+<P>void blas_scal(T a, Vector&lt;T&gt;&amp; x)</P>
+<P>void blas_scal(T a, Vector&lt;std::complex&lt;T&gt; x)</P>
+<P>void blas_swap(Vector&lt;T&gt;&amp; x, Vector&lt;T&gt;&amp; y)</P>
+<P>size_t blas_amax(const Vector&lt;T&gt;&amp; x)</P>
+</DIV>
+
+<H3>16.4.2. Level 2 BLAS functions.</H3>
+
+<DIV CLASS=clb>
+<P>void blas_gemv(T alpha, const Matrix&lt;T&gt;&amp; A, const
+Vector&lt;T&gt;&amp; x, T beta, Vector&lt;T&gt;&amp; y, const BlasParam& bp)</P>
+<P>void blas_ger(T alpha, const Vector&lt;T&gt;&amp; x, const
+Vector&lt;T&gt;&amp; y, Matrix&lt;T&gt;&amp; A)
+<P>void blas_symv(T alpha, const Matrix&lt;T&gt;&amp; A, const
+Vector&lt;T&gt;&amp; x, T beta, Vector&lt;T&gt;&amp; y, const BlasParam& bp)</P>
+<P>void blas_hemv(const std::complex&lt;T&gt;&amp; alpha, const
+Matrix&lt;std::complex&lt;T&gt; &gt;&amp; A, const
+Vector&lt;std::complex&lt;T&gt; &gt;&amp; x, const std::complex&lt;T&gt;&amp;
+beta, Vector&lt;std::complex&lt;T&gt; &gt;&amp; y, const BlasParam& bp)</P>
+<P>void blas_syr(T alpha, const Vector&lt;T&gt;&amp; x, Matrix&lt;T&gt;&amp; A,
+const BlasParam&amp; bp)</P>
+<P>void blas_her(T alpha, const Vector&lt;std::complex&lt;T&gt; &gt;&amp; x,
+Matrix&lt;std::complex&lt;T&gt; &gt;&amp; A, const BlasParam&amp; bp)</P>
+<P>void blas_syr2(T alpha, const Vector&lt;T&gt;&amp; x,
+const Vector&lt;T&gt;&amp; y, Matrix&lt;T&gt;&amp; A,
+const BlasParam&amp; bp)</P>
+<P>void blas_her2(const std::complex&lt;T&gt;&amp; alpha, const
+Vector&lt;std::complex&lt;T&gt; &gt;&amp; x, const
+Vector&lt;std::complex&lt;T&gt; &gt;&amp; y,
+Matrix&lt;std::complex&lt;T&gt; &gt;&amp; A, const BlasParam&amp; bp)</P>
+<P>void blas_trmv(const Matrix&lt;T&gt;&amp; A, Vector&lt;T&gt;&amp; x, const
+BlasParam&amp; bp)</P>
+<P>void blas_trsv(const Matrix&lt;T&gt;&amp; A, Vector&lt;T&gt;&amp; x, const
+BlasParam&amp; bp)</P>
+</DIV>
+
+<H3>16.4.3. Level 3 BLAS functions.</H3>
+
+<DIV CLASS=clb>
+<P>void blas_gemm(T aplha, const Matrix&lt;T&gt;&amp; A, const
+Matrix&lt;T&gt;&amp; B, T beta, Matrix&lt;T&gt;&amp; C, const BlasParam&amp;
+bp)</P>
+<P>void blas_symm(T aplha, const Matrix&lt;T&gt;&amp; A, const
+Matrix&lt;T&gt;&amp; B, T beta, Matrix&lt;T&gt;&amp; C, const BlasParam&amp;
+bp)</P>
+<P>void blas_hemm(const std::complex&lt;T&gt;&amp; aplha, const
+Matrix&lt;std::complex&lt;T&gt; &gt;&amp; A, const
+Matrix&lt;std::complex&lt;T&gt; &gt;&amp; B, const std::complex&lt;T&gt;&amp;
+beta, Matrix&lt;std::complex&lt;T&gt; &gt;&amp; C, const BlasParam&amp;
+bp)</P>
+<P>void blas_syrk(T aplha, const Matrix&lt;T&gt;&amp; A, T beta,
+Matrix&lt;T&gt;&amp; C, const BlasParam&amp; bp)</P>
+<P>void blas_herk(T aplha, const Matrix&lt;std::complex&lt;T&gt; &gt;&amp; A,
+T beta, Matrix&lt;std::complex&lt;T&gt; &gt;&amp; C, const BlasParam&amp;
+bp)</P>
+<P>void blas_syr2k(T aplha, const Matrix&lt;T&gt;&amp; A, const
+Matrix&lt;T&gt;&amp; B, T beta, Matrix&lt;T&gt;&amp; C, const BlasParam&amp;
+bp)</P>
+<P>void blas_her2k(const std::complex&lt;T&gt;&amp; aplha, const
+Matrix&lt;std::complex&lt;T&gt; &gt;&amp; A, const
+Matrix&lt;std::complex&lt;T&gt; &gt;&amp; B, const std::complex&lt;T&gt;&amp;
+beta, Matrix&lt;std::complex&lt;T&gt; &gt;&amp; C, const BlasParam&amp;
+bp)</P>
+<P>void blas_trmm(T aplha, const Matrix&lt;T&gt;&amp; A, Matrix&lt;T&gt;&amp;
+B, const BlasParam&amp; bp)</P>
+<P>void blas_trsm(T aplha, const Matrix&lt;T&gt;&amp; A, Matrix&lt;T&gt;&amp;
+B, const BlasParam&amp; bp)</P>
+</DIV>
+
+<H2>16.5. Simple Linear Algebra Functions.</H2>
+<P>New versions of the <CODE>dot_product()</CODE>, <CODE>direct_product()</CODE>,
+and <CODE>matrix_multiply()</CODE> functions found in "vm_tools.h" are provided,
+which make use of the <EM>CBLAS</EM> functions.</P>
+
+<DIV CLASS=clb>
+<P>template &lt;class T&gt; T bl_dot_product(const Vector&lt;T&gt;&amp; x,
+const Vector&lt;T&gt;&amp; y, bool conj_flag = false)</P>
+<P>template &lt;class T&gt; Matrix&lt;T&gt; bl_direct_product(const
+Vector&lt;T&gt;&amp; x, const Vector&lt;T&gt;&amp; y)</P>
+<P>template &lt;class T&gt; Vector&lt;T&gt; bl_matrix_multiply(const
+Vector&lt;T&gt;&amp; x, const Matrix&lt;T&gt;&amp; y)</P>
+<P>template &lt;class T&gt; Vector&lt;T&gt; bl_matrix_multiply(const
+Matrix&lt;T&gt;&amp; x, const Vector&lt;T&gt;&amp; y)</P>
+<P>template &lt;class T&gt; Matrix&lt;T&gt; bl_matrix_multiply(const
+Matrix&lt;T&gt;&amp; x, const Matrix&lt;T&gt;&amp; y)</P>
+<P>template &lt;class T&gt; void bl_matmult_trans(const
+Vector&lt;T&gt;&amp; x)</P>
+</DIV>
+<P>These functions are somewhat more restrictive than the versions provided in
+"vm_tools.h". First, they are only defined for the types <CODE>float</CODE>,
+<CODE>double</CODE>, <CODE>std::complex&lt;float&gt;</CODE>, and
+<CODE>std::complex&lt;double&gt;</CODE>. Second, all vectors must have positive
+strides, and all matrices must be in either row-major or column-major format.
+Unlike the <EM>CBLAS</EM> wrapper functions, though, it is not necessary for
+both matrices passed to the <CODE>bl_matrix_multiply()</CODE> function to be in
+the same format. One can be row-major, and the other can be column-major. The
+matrix returned by <CODE>bl_direct_product()</CODE> will always be row-major.
+The matrix returned by <CODE>bl_matmult_trans()</CODE> will be in the same
+format as the input matrix, and the matrix returned by the matrix-matrix version
+of <CODE>bl_matrix_multiply()</CODE> will be in the same format as the first
+argument.</P>
+
+<H2>16.6. Linear System Solver Classes.</H2>
+<P>Four classes are provided which serve as wrappers for a subset of the
+<EM>LAPACK</EM> routines. Only a subset of the <EM>LAPACK</EM> functions are
+represented. Specifically, these classes can be used to solve systems of
+equations using LU factorization, Cholesky factorization, LQ factorization,
+QR factorization, and SVD factorization. Additionally eigenvalues and
+eigenvectors of matrices can be found. These classes are templatized, but only
+two types are supported: <CODE>float</CODE> and <CODE>double</CODE>.</P>
+
+<H2>16.6.1. SquareSolver&lt;T&gt;</H2>
+<P>This class can factor a square matrix. Three different factorization methods
+are provided, depending on the type of matrix passed. In general, LU
+factorization is done. For symmetric matrices, the matrix is factored using an
+indefinite symmetric factorization method. If the matrix is symmetric and
+positive definite, Cholesky factorization is used. Once factorization is done,
+singularity is determined. If the matrix is not singular, then the factorization
+can be used to compute the determinent, compute the inverse, or to solve systems
+of equations.</P>
+
+<H3>16.6.1.1. Constructors and Destructor.</H3>
+<H4><CODE>SquareSolver&lt;T&gt;()</CODE></H4>
+<P>The default constructor does nothing. It can be used later by calling the
+<CODE>re-init()</CODE> member function.</P>
+
+<H4><CODE>SquareSolver&lt;T&gt;(const Matrix&lt;T&gt;&amp; A)</CODE></H4>
+<P>This constructor performs LU factorization on <CODE>A</CODE>. The matrix
+must be square. If not, a run-time error will occur. Be sure to check for
+singularity with the <CODE>is_nonsingular()</CODE> function before using the
+factorization to do anything.</P>
+
+<H4><CODE>SquareSolver&lt;T&gt;(const Matrix&lt;T&gt;&amp; A, Up_Lo_Flag uplo,
+bool pdflag = false)</CODE></H4>
+<P>Use this constructor for symmetric matrices. The <CODE>uplo</CODE> parameter
+tells the solver whether to use the upper or lower part of the matrix. The other
+half need not contain meaningful values. The optional parameter
+<CODE>pdflag</CODE> indicates whether the matrix is positive definite. The
+default value is <CODE>false</CODE>, in which case indefinite symmetric
+factorization is used. If the value is <CODE>true</CODE> the Cholesky
+factorization will be used. Note that the Cholesky factorization will fail if
+the matrix is not positive definite. In this case, the solver is reset to its
+default state.</P>
+
+<H4><CODE>SquareSolver&lt;T&gt;(const SquareSolver&lt;T&gt;&amp; ss)</CODE></H4>
+<P>The copy constructor makes a complete copy of the solver. All internal data
+and workspaces are copied.</P>
+
+<H4><CODE>~SquareSolver&lt;T&gt;()</CODE></H4>
+<P>The destructor deallocates all internal storage and workspace of the
+solver.</P>
+
+
+<H3>16.6.1.2. Member functions.</H3>
+
+<H4><CODE>SquareSolver&lt;T&gt;&amp; operator=(const SquareSolver&lt;T&gt;&amp;
+ss)</CODE></H4>
+<P>The assignment operator clears the state of the solver, and then makes it a
+copy of <CODE>ss</CODE>.</P>
+
+<H4><CODE>void clear(bool clr_wrk = true)</CODE></H4>
+<P>This function is used to clear the state of the solver. By default this
+function also deallocates any resources which have been allocated by the solver.
+The optional argument can be set to <CODE>false</CODE> to instruct the solver
+not to deallocate these resources. This may be faster if you wish to re-use the
+solver for a different matrix.</P>
+
+<H4><CODE>size_t workspace() const</CODE></H4>
+<P>Returns the number of bytes the solver has allocated on the Heap for its
+internal workspace.</P>
+
+<H4><CODE>void re_init(const Matrix&lt;T&gt;&amp; A)</CODE></H4>
+<P>This re-initializes the solver with the new matrix <CODE>A</CODE>. This
+version of the function performs LU facorization.</P>
+
+<H4><CODE>void re_init(const Matrix&lt;T&gt;&amp; A, Up_Lo_Flag uplo, bool
+pdflag = false)</CODE></H4>
+<P>This re-initializes the solver with the new symmetrix matrix <CODE>A</CODE>.
+This version of the function performs symmetric indefinite facorization by
+default, or Cholesky factorization if <CODE>pdflag = true</CODE>.</P>
+
+<H4><CODE>Matrix&lt;T&gt; get_factors() const</CODE></H4>
+<P>Returns a matrix containing the factorization of the input matrix. This will
+be a square matrix with the same dimensions as the input matrix. The exact
+format of this matrix depends on the factorization which was used.</P>
+
+<P>For LU factorization, the values below the diagonal represent the
+lower-unit-triangular factor <EM>L</EM>, and the values on and above the
+diagonal represent the upper-triangular factor <EM>U</EM>. Note that this LU
+factorization method uses partial pivoting, so the product LU is not the input
+matrix. The <CODE>get_ipiv()</CODE> function can be used to find the pivoting
+which was used.</P>
+
+<P>For symmetrix indefinite factorization, the form is somewhat complicated. The
+factorization is <CODE>A = U * D * UT</CODE>, or <CODE>A = L * D * LT</CODE>,
+depending on the <CODE>uplo</CODE> paramater used. See the documentation for
+the <EM>LAPACK</EM> functions <CODE>ssytrf()</CODE> and <CODE>dsytrf()</CODE>
+for exact details on how this factorization is stored. As with the LU case,
+pivoting is used, so you will need to use the <CODE>get_ipiv()</CODE> function
+as well.</P>
+
+<P>For Cholesky factorization, the factorization is <CODE>A = L * LT</CODE>, or
+<CODE>A = U * UT</CODE>, depending on the value of the <CODE>uplo</CODE>
+parameter used. This function thus returns either L, or U, accordingly. Note
+that only the values in the upper part of the matrix (in the case of U), or the
+lower part of the matrix (in the case of L), are meaningful. Do not assume that
+the other values are actually zero. No pivoting is used for this
+factorization.</P>
+
+<P>In all cases, this function returns a deep copy of the internal
+factorization.</P> 
+
+<H4><CODE>Vec_INT get_ipiv() const</CODE></H4>
+<P>This returns a vector of integers representing the pivoting used in the
+LU and the symmetric indefinite factorizations. For each <CODE>i</CODE> from
+<CODE>0</CODE> to <CODE>n-1</CODE>, where <CODE>n</CODE> is the order of the
+matrix, the row <CODE>i</CODE> of the matrix was interchanged with row
+<CODE>ipiv[i] - 1</CODE>. Note that since this vector is generated by a
+<EM>Fortran</EM> function, the values range from <CODE>1</CODE> to
+<CODE>n</CODE>. A deep copy of the internal vector is returned. In the case of
+Cholesky factorization, an empty vector is returned.</P>  
+
+<H4><CODE>Vector&lt;T&gt; solve(const Vector&lt;T&gt;&amp; b)</CODE></H4>
+<P>This solves the linear system <CODE>Ax = b</CODE>. The vector <CODE>b</CODE>
+must be the same size as the order of <CODE>A</CODE>. If the system is singular,
+then an empty vector is returned.</P>
+
+<H4><CODE>Matrix&lt;T&gt; solve(const Matrix&lt;T&gt;&amp; B)</CODE></H4>
+<P>This solves the linear system <CODE>AX = B</CODE>. The matrix <CODE>B</CODE>
+must have rows equal to he order of <CODE>A</CODE>. If the system is singular,
+then an empty matrix is returned.</P>
+
+<H4><CODE>size_t order() const</CODE></H4>
+<P>Returns the order of the input matrix.</P>
+
+<H4><CODE>bool is_nonsingular() const</CODE></H4>
+<P>Returns <CODE>false</CODE> if the system is singular, and <CODE>true</CODE>
+if it is not.</P>
+
+<H4><CODE>T det() const</CODE></H4>
+<P>Returns the determinent of the input matrix.</P>
+
+<H4><CODE>Matrix&lt;T&gt; inverse()</CODE></H4>
+<P>If the system is nonsingular, this returns the inverse of the input matrix.
+In the singular case, an empty matrix is returned.</P>
+
+<H2>16.6.2. GenSolver&lt;T&gt;</H2>
+<P>This class can factor a general rectangular matrix. Two different
+factorization methods are provided, depending on whether there are more rows or
+columns in the matrix. For wide matrices (more columns than rows), LQ
+factorization is done. For tall matrices (as many or more rows than columns),
+QR factorization is done. Once the factorization is done, the rank of the matrix
+is determined. If the matrix is full rank, then the factorization can be used
+to compute the inverse, or to solve systems of equations.</P>
+
+<H3>16.6.2.1. Constructors and Destructor.</H3>
+<H4><CODE>GenSolver&lt;T&gt;()</CODE></H4>
+<P>The default constructor does nothing. It can be used later by calling the
+<CODE>re-init()</CODE> member function.</P>
+
+<H4><CODE>GenSolver&lt;T&gt;(const Matrix&lt;T&gt;&amp; A)</CODE></H4>
+<P>This constructor performs either LQ or QR factorization on <CODE>A</CODE>,
+depending on the dimensions of the matrix. Be sure to check that the matrix is
+full rank with either the <CODE>is_full_rank()</CODE> or <CODE>rank()</CODE>
+function before using the factorization to do anything.</P>
+
+<H4><CODE>GenSolver&lt;T&gt;(const GenSolver&lt;T&gt;&amp; gs)</CODE></H4>
+<P>The copy constructor makes a complete copy of the solver. All internal data
+and workspaces are copied.</P>
+
+<H4><CODE>~GenSolver&lt;T&gt;()</CODE></H4>
+<P>The destructor deallocates all internal storage and workspace of the
+solver.</P>
+
+
+<H3>16.6.2.2. Member functions.</H3>
+
+<H4><CODE>GenSolver&lt;T&gt;&amp; operator=(const GenSolver&lt;T&gt;&amp;
+gs)</CODE></H4>
+<P>The assignment operator clears the state of the solver, and then makes it a
+copy of <CODE>ss</CODE>.</P>
+
+<H4><CODE>void clear(bool clr_wrk = true)</CODE></H4>
+<P>This function is used to clear the state of the solver. By default this
+function also deallocates any resources which have been allocated by the solver.
+The optional argument can be set to <CODE>false</CODE> to instruct the solver
+not to deallocate these resources. This may be faster if you wish to re-use the
+solver for a different matrix.</P>
+
+<H4><CODE>size_t workspace() const</CODE></H4>
+<P>Returns the number of bytes the solver has allocated on the Heap for its
+internal workspace.</P>
+
+<H4><CODE>void re_init(const Matrix&lt;T&gt;&amp; A)</CODE></H4>
+<P>This re-initializes the solver with the new matrix <CODE>A</CODE>. Again,
+either LQ or QR facorization is performed, depending on the dimensions of the
+matrix.</P>
+
+<H4><CODE>Matrix&lt;T&gt; get_L() const</CODE></H4>
+<P>Returns a matrix containing the lower-triangular factor of the LQ
+factorization. This is a square <CODE>nxn</CODE> matrix where <CODE>n</CODE>
+is the number of rows of the input matrix. Returns an empty matrix if QR
+factorization was performed. A deep copy of the matrix is returned by this
+function.</P>
+
+<H4><CODE>Matrix&lt;T&gt; get_R() const</CODE></H4>
+<P>Returns a matrix containing the upper-triangular factor of the QR
+factorization. Returns an empty matrix if LQ factorization was performed. A deep
+copy of the matrix is returned by this function.</P>
+
+<H4><CODE>Matrix&lt;T&gt; get_Q() const</CODE></H4>
+<P>Returns a matrix containing either the first <CODE>n</CODE> rows of the
+unitary factor Q (in the case of LQ factorization), or the first <CODE>n</CODE>
+columns of the unitary factor Q (in the case of QR factorization), where
+<CODE>n</CODE> is the smaller dimension of the input matrix. This means that in
+both cases, the returned matrix has the same dimensions as the input matrix. A
+deep copy of the matrix is returned by this function.</P>
+
+<H4><CODE>Vector&lt;T&gt; solve(const Vector&lt;T&gt;&amp; b)</CODE></H4>
+<P>This solves the linear system <CODE>Ax = b</CODE>. The vector <CODE>b</CODE>
+must be the same size as the number of rows of <CODE>A</CODE>. If the system is
+not full rank, then an empty vector is returned. If it is full rank, then the
+returned vector will have size equal to the number of columns of <CODE>A</CODE>,
+and will be either the minimum-norm solution (in the case of LQ factorization),
+or the least-squares solution (in the case of QR factorization) to the
+system of equations.</P>
+
+<H4><CODE>Matrix&lt;T&gt; solve(const Matrix&lt;T&gt;&amp; B)</CODE></H4>
+<P>This solves the linear system <CODE>AX = B</CODE>. The matrix <CODE>B</CODE>
+must have rows equal to the number of rows of <CODE>A</CODE>. If the system is
+not full rank, then an empty matrix is returned. If it is full rank, then the
+returned matrix will have rows equal to the number of columns of
+<CODE>A</CODE>, and columns equal to the number of columns of <CODE>B</CODE>,
+and will be either the minimum-norm solution (in the case of LQ factorization),
+or the least-squares solution (in the case of QR factorization) to the
+system of equations.</P>
+
+<H4><CODE>size_t rank() const</CODE></H4>
+<P>Returns the rank of the input matrix.</P>
+
+<H4><CODE>bool is_full_rank() const</CODE></H4>
+<P>Returns <CODE>false</CODE> if the system is not full-rank, and
+<CODE>true</CODE> if it is.</P>
+
+<H4><CODE>Matrix&lt;T&gt; inverse()</CODE></H4>
+<P>If the system is full-rank, this returns the inverse of the input matrix.
+If not, an empty matrix is returned. This inverse is defined such that if
+<CODE>X</CODE> is the minimum-norm or least-squares solution to the system
+<CODE>AX = B</CODE>, then <CODE>A(i)B = X</CODE>, where <CODE>A(i)</CODE> is
+the returned inverse matrix.</P> 
+
+<H2>16.6.3. SVD&lt;T&gt;</H2>
+<P>This class performs a singular value decomposition on a general rectangular
+matrix. This factors the matrix into the form <CODE>A = USV'</CODE>, where
+<CODE>U</CODE> and <CODE>V</CODE> are unitary matrices, and <CODE>S</CODE>
+is a diagonal matrix of the singular values. This class can then be used to
+determine the rank of the matrix, and find the minimum-norm-least-squares
+solution to singular systems of equations.</P>
+
+<H3>16.6.3.1. Constructors and Destructor.</H3>
+<H4><CODE>SVD&lt;T&gt;()</CODE></H4>
+<P>The default constructor does nothing. It can be used later by calling the
+<CODE>re-init()</CODE> member function.</P>
+
+<H4><CODE>SVD&lt;T&gt;(const Matrix&lt;T&gt;&amp; A)</CODE></H4>
+<P>This constructor performs the singular value decomposition.</P>
+
+<H4><CODE>SVD&lt;T&gt;(const SVD&lt;T&gt;&amp; svd)</CODE></H4>
+<P>The copy constructor makes a complete copy of the solver. All internal data
+and workspaces are copied.</P>
+
+<H4><CODE>~SVD&lt;T&gt;()</CODE></H4>
+<P>The destructor deallocates all internal storage and workspace of the
+solver.</P>
+
+<H3>16.6.3.2. Member functions.</H3>
+
+<H4><CODE>SVD&lt;T&gt;&amp; operator=(const GSVD&lt;T&gt;&amp;
+svd)</CODE></H4>
+<P>The assignment operator clears the state of the solver, and then makes it a
+copy of <CODE>ss</CODE>.</P>
+
+<H4><CODE>void clear(bool clr_wrk = true)</CODE></H4>
+<P>This function is used to clear the state of the solver. By default this
+function also deallocates any resources which have been allocated by the solver.
+The optional argument can be set to <CODE>false</CODE> to instruct the solver
+not to deallocate these resources. This may be faster if you wish to re-use the
+solver for a different matrix.</P>
+
+<H4><CODE>size_t workspace() const</CODE></H4>
+<P>Returns the number of bytes the solver has allocated on the Heap for its
+internal workspace.</P>
+
+<H4><CODE>void re_init(const Matrix&lt;T&gt;&amp; A)</CODE></H4>
+<P>This re-initializes the solver with the new matrix <CODE>A</CODE>.</P>
+
+<H4><CODE>Matrix&lt;T&gt; get_U() const</CODE></H4>
+<P>Returns a matrix containing the first <CODE>n</CODE> rows of the unitary
+factor U, where <CODE>n</CODE> is the number of rows of the input matrix. A
+deep copy of the matrix is returned by this function.</P>
+
+<H4><CODE>Matrix&lt;T&gt; get_VT() const</CODE></H4>
+<P>Returns a matrix containing the first <CODE>m</CODE> colums of the unitary
+factor VT (the transpose of V), where <CODE>m</CODE> is the number of columns
+of the input matrix. A deep copy of the matrix is returned by this function.</P>
+
+<H4><CODE>Vector&lt;T&gt; get_S() const</CODE></H4>
+<P>Returns a vector containing the diagonal elements of the factor S. These
+factors are all non-negative, and sorted largest to smallest. A deep copy of
+the vector is returned by this function.</P>
+
+<H4><CODE>Vector&lt;T&gt; view_S() const</CODE></H4>
+<P>Returns a vector containing the diagonal elements of the factor S. These
+factors are all non-negative, and sorted largest to smallest. This function
+returns a shallow copy view of the internal vector of singular values. It can
+thus be edited in order to introduce additional constraints into the solver.</P>
+
+<H4><CODE>Vector&lt;T&gt; solve(const Vector&lt;T&gt;&amp; b)</CODE></H4>
+<P>This solves the linear system <CODE>Ax = b</CODE>. The vector <CODE>b</CODE>
+must be the same size as the number of rows of <CODE>A</CODE>. This gives the
+minimum-norm-least-squares solution to the system.</P>
+
+<H4><CODE>Matrix&lt;T&gt; solve(const Matrix&lt;T&gt;&amp; B)</CODE></H4>
+<P>This solves the linear system <CODE>AX = B</CODE>. The matrix <CODE>B</CODE>
+must have rows equal to the number of rows of <CODE>A</CODE> This gives the
+minimum-norm-least-squares solution to the system.</P>
+
+<H4><CODE>size_t rank() const</CODE></H4>
+<P>Returns the rank of the input matrix.</P>
+
+<H4><CODE>bool status() const</CODE></H4>
+<P>Returns <CODE>false</CODE> if the singular value decomposition failed to
+converge, and <CODE>true</CODE> otherwise.</P>
+
+<H4><CODE>Matrix&lt;T&gt; inverse()</CODE></H4>
+<P>This returns the inverse of the input matrix. This inverse is defined such
+that if <CODE>X</CODE> is the minimum-norm-least-squares solution to the system
+<CODE>AX = B</CODE>, then <CODE>A(i)B = X</CODE>, where <CODE>A(i)</CODE> is
+the returned inverse matrix.</P> 
+
+<H2>16.6.4. EigenValue&lt;T&gt;</H2>
+<P>This class computes the eigenvalues and eigenvectors of a real square
+matrix.</P>
+
+<H3>16.6.4.1. Constructors and Destructor.</H3>
+
+<H4><CODE>EigenValue&lt;T&gt;()</CODE></H4>
+<P>The default constructor does nothing. The object can be used later by calling
+the <CODE>re_init()</CODE> function.</P>
+
+<H4><CODE>EigenValue&lt;T&gt;(const Matrix&lt;T&gt;&amp; A)</CODE></H4>
+<P>This constructor computes the real and imaginary eigenvalues and eigenvectors
+of the general square matrix <CODE>A</CODE>. If <CODE>A</CODE> is no square,
+then a run-time error will occur.</P>
+
+<H4><CODE>EigenValue&lt;T&gt;(const Matrix&lt;T&gt;&amp; A, Up_Lo_Flag
+uplo)</CODE></H4>
+<P>This constructor computes the eigenvalues and eigenvectors of the symmetrix
+matrix <CODE>A</CODE>. If <CODE>A</CODE> is no square, then a run-time error
+will occur. The parameter <CODE>uplo</CODE> instructs the constructor whether
+to use the upper or lower half of the matrix. The other half is not referenced,
+and need not contain meaningful values.</P>
+
+<H4><CODE>size_t order() const</CODE></H4>
+<P>Returns the order of the input matrix.</P>
+
+<H4><CODE>size_t num_real() const</CODE></H4>
+<P>Returns the number of real eigenvalues (and eigenvectors) of the matrix. If
+the matrix was symmetric, then this will be equal to the order of the matrix.</P>
+
+<H4><CODE>size_t num_complex() const</CODE></H4>
+<P>Returns the number of complex eigenvalues (and eigenvectors) of the matrix.
+If the matrix was symmetric, the this will be zero.</P>
+
+<H4><CODE>bool status() const</CODE></H4>
+<P>Returns <CODE>true</CODE> if the eigenvectors were all successfully
+computed, and <CODE>false</CODE> otherwise.</P>
+
+<H4><CODE>int status() const</CODE></H4>
+<P>Returns -1 if the eigenvectors were computed successfully. If not, it returns
+the index of the eigenvalue for which the eigenvector could not be computed.</P>
+
+<H4><CODE>void clear(bool clr_wrk = true)</CODE></H4>
+<P>This function is used to clear the state of the solver. By default this
+function also deallocates any resources which have been allocated by the solver.
+The optional argument can be set to <CODE>false</CODE> to instruct the solver
+not to deallocate these resources. This may be faster if you wish to re-use the
+solver for a different matrix.</P>
+
+<H4><CODE>size_t workspace() const</CODE></H4>
+<P>Returns the number of bytes the solver has allocated on the Heap for its
+internal workspace.</P>
+
+<H4><CODE>void re_init(const Matrix&lt;T&gt;&amp; A)</CODE></H4>
+<P>This re-initializes the solver with the new general square matrix
+<CODE>A</CODE>.</P>
+
+<H4><CODE>void re_init(const Matrix&lt;T&gt;&amp; A, Up_Lo_Flag
+uplo)</CODE></H4>
+<P>This re-initializes the solver with the new symmetric matrix
+<CODE>A</CODE>.</P>
+
+<H4><CODE>Vector&lt;T&gt; real_eigenvalues() const</CODE></H4>
+<P>Returns a vector containing the real eigenvalues of the matrix. This is a
+deep copy.</P> 
+
+<H4><CODE>Vector&lt;std::complex&lt;T&gt; &gt; complex_eigenvalues()
+const</CODE></H4>
+<P>Returns a vector containing the complex eigenvalues of the matrix. This is a
+deep copy.</P> 
+
+<H4><CODE>Matrix&lt;T&gt; real_eigenvectors() const</CODE></H4>
+<P>Returns a matrix containing the real eigenvectors. Each row <CODE>i</CODE>
+contains the eigenvector corresponding to the <CODE>i</CODE>th real eigenvalue.
+This is a deep copy.</P> 
+
+<H4><CODE>Matrix&lt;std::complex&lt;T&gt; &gt; complex_eigenvectors()
+const</CODE></H4>
+<P>Returns a matrix containing the complex eigenvectors. Each row
+<CODE>i</CODE> contains the eigenvector corresponding to the <CODE>i</CODE>th
+complex eigenvalue. This is a deep copy.</P> 
+
+<P><A HREF="compatibility.htm">Next Section</A></P>
+<P><A HREF="vecmat.htm">Back to Index</A></P>
+
+</BODY>
+</HTML>

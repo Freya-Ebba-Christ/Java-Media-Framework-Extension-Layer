@@ -1,0 +1,25 @@
+Microsoft Visual Studio Solution File, Format Version 8.00
+Project("{EAF909A5-FA59-4C3D-9431-0FCC20D5BCF9}") = "Classifier", "Classifier.icproj", "{8E68E995-DD22-42BB-B0FE-EBCEFA97FA14}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfiguration) = preSolution
+		Debug = Debug
+		Release = Release
+	EndGlobalSection
+	GlobalSection(ProjectConfiguration) = postSolution
+		{8E68E995-DD22-42BB-B0FE-EBCEFA97FA14}.Debug.ActiveCfg = Debug|Win32
+		{8E68E995-DD22-42BB-B0FE-EBCEFA97FA14}.Debug.Build.0 = Debug|Win32
+		{8E68E995-DD22-42BB-B0FE-EBCEFA97FA14}.Release.ActiveCfg = Release|Win32
+		{8E68E995-DD22-42BB-B0FE-EBCEFA97FA14}.Release.Build.0 = Release|Win32
+		{E607AD9A-0A0C-41BF-8F95-EAD1396B6CB1}.Release.Build.0 = Release|Win32
+		{E607AD9A-0A0C-41BF-8F95-EAD1396B6CB1}.Release.ActiveCfg = Release|Win32
+		{E607AD9A-0A0C-41BF-8F95-EAD1396B6CB1}.Debug.Build.0 = Debug|Win32
+		{E607AD9A-0A0C-41BF-8F95-EAD1396B6CB1}.Debug.ActiveCfg = Debug|Win32
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+	EndGlobalSection
+	GlobalSection(ExtensibilityAddIns) = postSolution
+	EndGlobalSection
+EndGlobal

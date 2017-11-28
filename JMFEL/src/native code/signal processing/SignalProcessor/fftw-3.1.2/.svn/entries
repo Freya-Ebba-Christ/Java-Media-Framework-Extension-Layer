@@ -1,0 +1,67 @@
+8
+
+dir
+23
+http://sourcecode.isip.uni-luebeck.de/svn/javaeeg/trunk/Beaker/src/native%20code/signal%20processing/SignalProcessor/fftw-3.1.2
+http://sourcecode.isip.uni-luebeck.de/svn/javaeeg
+
+
+
+2008-07-24T13:38:57.346004Z
+23
+christ
+
+
+svn:special svn:externals svn:needs-lock
+
+fftw3.h
+file
+
+
+
+
+2006-07-03T22:35:20.000000Z
+927b67b9b51a4406a2673c0ce8d4cb47
+2008-07-24T13:38:57.346004Z
+23
+christ
+
+libfftw3l-3.lib
+file
+
+
+
+
+2007-01-03T00:30:30.000000Z
+e08718fd3b6db888ab54df53e4ff4b48
+2008-07-24T13:38:57.346004Z
+23
+christ
+has-props
+
+libfftw3-3.lib
+file
+
+
+
+
+2007-01-03T00:31:24.000000Z
+08dab5a809fd52077468fe6a85537f41
+2008-07-24T13:38:57.346004Z
+23
+christ
+has-props
+
+libfftw3f-3.lib
+file
+
+
+
+
+2007-01-03T00:31:12.000000Z
+f2a57f12b83c6a3946e973342e3e4b0e
+2008-07-24T13:38:57.346004Z
+23
+christ
+has-props
+

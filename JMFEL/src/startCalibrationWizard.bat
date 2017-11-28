@@ -1,0 +1,1 @@
+java media.protocol.gtec.CalibrationWizard -serial UA-2007.04.01
